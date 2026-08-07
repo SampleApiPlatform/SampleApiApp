@@ -38,29 +38,6 @@ steps:
     arguments: '--configuration $(buildConfiguration)'
 
 # ---------------------------------------------------------
-# Build EF Core migration bundle
-# ---------------------------------------------------------
-- task: DotNetCoreCLI@2
-  displayName: Build EF migration bundle
-  inputs:
-    command: custom
-    custom: ef
-    arguments: "migrations bundle --project SampleApi --output efbundle"
-
-# ---------------------------------------------------------
-# ⭐ NEW: Run EF migration bundle against Azure SQL
-# ---------------------------------------------------------
-- task: Bash@3
-  displayName: Run EF migration bundle
-  inputs:
-    targetType: inline
-    script: |
-      echo "Running EF migration bundle..."
-      chmod +x efbundle
-
-      ./efbundle \
-        --connection "$(sampleapiDBConnectionstring)"
-# ---------------------------------------------------------
 # Test + Coverage
 # ---------------------------------------------------------
 - task: DotNetCoreCLI@2
@@ -123,4 +100,7 @@ steps:
     inlineScript: |
       echo "Setting ACA secret DefaultConnectionString..."
       az containerapp secret set \
-        --name sampleapi
+        --name sampleapi \
+        --resource-group sampleapi-rg \
+        --environment sampleapi-env \
+        --secrets DefaultConnectionString="$(sampleapiDBConnectionstring)"
