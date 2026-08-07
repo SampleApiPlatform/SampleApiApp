@@ -1,0 +1,35 @@
+// What this gives you
+//.NET 8 SDK installed
+//C# Dev Kit + C# extension
+//Docker extension
+//REST Client for testing endpoints
+//Ports 5000/5001 forwarded for your API
+//Automatic dotnet restore on startup
+
+{
+  "name": "SampleApi DevContainer",
+  "dockerFile": "Dockerfile",
+
+  "features": {
+    "ghcr.io/devcontainers/features/dotnet:2": {
+      "version": "8.0"
+    }
+  },
+
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-dotnettools.csharp",
+        "ms-dotnettools.csdevkit",
+        "ms-azuretools.vscode-docker",
+        "humao.rest-client"
+      ]
+    }
+  },
+
+  "postCreateCommand": "dotnet restore",
+
+  "forwardPorts": [5000, 5001],
+
+  "remoteUser": "vscode"
+}
