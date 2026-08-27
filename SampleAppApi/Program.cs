@@ -17,6 +17,8 @@ var issuer = jwtSettings.GetValue<string>("Issuer")
 var audience = jwtSettings.GetValue<string>("Audience")
     ?? throw new Exception("JWT Audience is missing in configuration");
 
+
+
 // Register services
 var sharedServicesUrl = builder.Configuration["ServiceUrls:SharedServices"];
 ArgumentException.ThrowIfNullOrWhiteSpace(sharedServicesUrl);
@@ -86,6 +88,8 @@ builder.Services.AddSwaggerDocumentation();
 builder.Services.AddControllers();
 
 // ⭐ Register Authentication + JWT Bearer
+
+
 builder.Services.AddAuthentication(options =>
 {
     options.DefaultAuthenticateScheme = "JwtBearer";
@@ -96,13 +100,13 @@ builder.Services.AddAuthentication(options =>
     options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
     {
         ValidateIssuer = true,
-        ValidateAudience = true,
+         ValidateAudience = true,
         ValidateLifetime = true,
         ValidateIssuerSigningKey = true,
 
         ValidIssuer = issuer,
         ValidAudience = audience,
-        IssuerSigningKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(
+            IssuerSigningKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(
             System.Text.Encoding.UTF8.GetBytes(key)
         )
     };
@@ -112,7 +116,7 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddAuthorization();
 
 var app = builder.Build();
-
+app.UseMiddleware<GlobalExceptionMiddleware>();
 
 if (app.Environment.IsDevelopment() || app.Environment.IsStaging())
 {

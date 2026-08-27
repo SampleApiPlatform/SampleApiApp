@@ -34,8 +34,8 @@ public class MoviesController : ControllerBase
     [HttpGet]
     public async Task<ActionResult<IEnumerable<MovieDTORead>>> GetAll()
     {
-        try
-        {
+        //try
+        //{
             var serviceResult = await _dataAccessClient.GetAll();
 
             if (!serviceResult.Success)
@@ -52,26 +52,26 @@ public class MoviesController : ControllerBase
             }
 
             return Ok(serviceResult.Data);
-        }
-        catch (Exception ex)
-        {
-            var message = $"MovieController.GetAll Exception: {ex.Message}";
-
-            await _sharedServicesClient.LogAsync(
-                controllerName,
-                message,
-                LogLevel.Error
-            );
-
-            return StatusCode(500, message);
-        }
+        //}
+        //catch (Exception ex)
+        //{
+        //    var message = $"MovieController.GetAll Exception: {ex.Message}";
+        // 
+        //    await _sharedServicesClient.LogAsync(
+        //        controllerName,
+        //        message,
+        //        LogLevel.Error
+        //    );
+        // 
+        //    return StatusCode(500, message);
+        //}
     }
 
     [HttpGet]
     public async Task<ActionResult<MovieDTORead>> GetById(string id)
     {
-        try
-        {
+        //try
+        //{
             var serviceResult = await _dataAccessClient.GetById(id);
 
             if (!serviceResult.Success)
@@ -88,19 +88,19 @@ public class MoviesController : ControllerBase
             }
 
             return Ok(serviceResult.Data);
-        }
-        catch (Exception ex)
-        {
-            var message = $"MovieController.GetById Exception: {ex.Message}";
+        //}
+        //catch (Exception ex)
+        //{
+        //    var message = $"MovieController.GetById Exception: {ex.Message}";
 
-            await _sharedServicesClient.LogAsync(
-                controllerName,
-                message,
-                LogLevel.Error
-            );
+        //    await _sharedServicesClient.LogAsync(
+        //        controllerName,
+        //        message,
+        //        LogLevel.Error
+        //    );
 
-            return StatusCode(500, message);
-        }
+        //    return StatusCode(500, message);
+        //}
     }
 
 
@@ -110,8 +110,8 @@ public class MoviesController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Add(MovieDTOAdd movieDTOAdd)
     {
-        try
-        {
+        //try
+        //{
             var serviceResult = await _dataAccessClient.Add(movieDTOAdd);
 
             if (!serviceResult.Success)
@@ -128,19 +128,19 @@ public class MoviesController : ControllerBase
             }
 
             return Ok(serviceResult.Data);
-        }
-        catch (Exception ex)
-        {
-            var message = $"MovieController.Add Exception: {ex.Message}";
+        //}
+        //catch (Exception ex)
+        //{
+        //    var message = $"MovieController.Add Exception: {ex.Message}";
 
-            await _sharedServicesClient.LogAsync(
-                controllerName,
-                message,
-                LogLevel.Error
-            );
+        //    await _sharedServicesClient.LogAsync(
+        //        controllerName,
+        //        message,
+        //        LogLevel.Error
+        //    );
 
-            return StatusCode(500, message);
-        }
+        //    return StatusCode(500, message);
+        //}
 
     }
 
@@ -148,8 +148,8 @@ public class MoviesController : ControllerBase
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(string id, MovieDTOUpdate movieDTOUpdate)
     {
-        try
-        {
+        //try
+        //{
             var serviceResult = await _dataAccessClient.Update(id, movieDTOUpdate);
 
             if (!serviceResult.Success)
@@ -166,27 +166,27 @@ public class MoviesController : ControllerBase
             }
 
             return Ok(serviceResult.Data);
-        }
-        catch (Exception ex)
-        {
-            var message = $"MovieController.Update Exception: {ex.Message}";
+        //}
+        //catch (Exception ex)
+        //{
+        //    var message = $"MovieController.Update Exception: {ex.Message}";
 
-            await _sharedServicesClient.LogAsync(
-                controllerName,
-                message,
-                LogLevel.Error
-            );
+        //    await _sharedServicesClient.LogAsync(
+        //        controllerName,
+        //        message,
+        //        LogLevel.Error
+        //    );
 
-            return StatusCode(500, message);
-        }
+        //    return StatusCode(500, message);
+        //}
     }
 
     [Authorize]
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(string id)
     {
-        try
-        {
+        //try
+        //{
             var serviceResult = await _dataAccessClient.Delete(id);
 
             if (!serviceResult.Success)
@@ -203,19 +203,19 @@ public class MoviesController : ControllerBase
             }
 
             return Ok(serviceResult.Data);
-        }
-        catch (Exception ex)
-        {
-            var message = $"MovieController.Delete Exception: {ex.Message}";
+        //}
+        //catch (Exception ex)
+        //{
+        //    var message = $"MovieController.Delete Exception: {ex.Message}";
 
-            await _sharedServicesClient.LogAsync(
-                controllerName,
-                message,
-                LogLevel.Error
-            );
+        //    await _sharedServicesClient.LogAsync(
+        //        controllerName,
+        //        message,
+        //        LogLevel.Error
+        //    );
 
-            return StatusCode(500, message);
-        }
+        //    return StatusCode(500, message);
+        //}
 
     }
 }
