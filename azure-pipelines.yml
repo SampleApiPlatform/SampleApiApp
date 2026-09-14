@@ -24,4 +24,4 @@ steps:
 
 - script: |
     docker push popdemar/sampleappapi:latest
-  displayName: Push Image to Docker Hub
+  displayName: Push Image to Docker Hub.
