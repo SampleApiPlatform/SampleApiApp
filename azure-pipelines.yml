@@ -15,7 +15,7 @@ steps:
   displayName: Install Docker
 
 - script: |
-    docker build -t popdemar/sampledataaccessapi:latest .
+    docker build -t popdemar/sampleappapi:latest .
   displayName: Build Docker Image
 
 - script: |
@@ -23,5 +23,5 @@ steps:
   displayName: Docker Login
 
 - script: |
-    docker push popdemar/sampledataaccessapi:latest
+    docker push popdemar/sampleappapi:latest
   displayName: Push Image to Docker Hub
