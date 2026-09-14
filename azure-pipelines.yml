@@ -1,5 +1,5 @@
 trigger:
-- main
+- master
 
 pool:
   vmImage: 'ubuntu-latest'
@@ -16,11 +16,11 @@ steps:
 
 - script: |
     docker build -t popdemar/sampleappapi:latest .
-  displayName: Build Docker Image
+  displayName: Build Docker Image.
 
 - script: |
     echo $(DOCKERHUB_TOKEN) | docker login -u popdemar --password-stdin
-  displayName: Docker Login
+  displayName: Docker Login.
 
 - script: |
     docker push popdemar/sampleappapi:latest
