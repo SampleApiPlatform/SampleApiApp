@@ -106,7 +106,7 @@ steps:
 # Push Docker image
 # ---------------------------------------------------------
 - script: |
-    docker push $(DOCKERHUB_USERNAME)/sampledataaccessapi:latest
+    docker push $(DOCKERHUB_USERNAME)/sampleappapi:latest
   displayName: Push Docker image
 
 # ---------------------------------------------------------
