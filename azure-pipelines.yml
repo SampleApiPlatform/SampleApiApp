@@ -6,8 +6,8 @@ pool:
 
 variables:
 
-#- name: solution
-#  value: '**/*.sln'
+- name: solution
+  value: '**/*.sln'
 
 - name: buildPlatform
   value: 'Any CPU'
