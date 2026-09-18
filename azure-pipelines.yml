@@ -87,7 +87,7 @@ steps:
   displayName: Update ACA image
   inputs:
     #we reuse the same service connection as in SampleDataAccessApi because it is only to login into Azure
-    azureSubscription: 'SampleDataAccessApi_ServiceConnection'
+    azureSubscription: 'SampleAppApi_ServiceConnection'
     scriptType: bash
     scriptLocation: inlineScript
     inlineScript: |
