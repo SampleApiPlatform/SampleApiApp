@@ -20,19 +20,20 @@ var builder = WebApplication.CreateBuilder(args);
 
 
 // Register services
-var sharedServicesUrl = builder.Configuration["ServiceUrls:SharedServices"];
-ArgumentException.ThrowIfNullOrWhiteSpace(sharedServicesUrl);
-builder.Services.AddHttpClient<ISharedServicesClient, SharedServicesClient>(client =>
-{
-    client.BaseAddress = new Uri(sharedServicesUrl);
-});
+//var sharedServicesUrl = builder.Configuration["ServiceUrls:SharedServices"];
+//ArgumentException.ThrowIfNullOrWhiteSpace(sharedServicesUrl);
+//builder.Services.AddHttpClient<ISharedServicesClient, SharedServicesClient>(client =>
+//{
+//    client.BaseAddress = new Uri(sharedServicesUrl);
+//});
+
 // Register services
-var dataAccessUrl = builder.Configuration["ServiceUrls:DataAccessServices"];
-ArgumentException.ThrowIfNullOrWhiteSpace(dataAccessUrl);
-builder.Services.AddHttpClient<IDataAccessClient, DataAccessClient>(client =>
-{
-    client.BaseAddress = new Uri(dataAccessUrl);
-});
+//var dataAccessUrl = builder.Configuration["ServiceUrls:DataAccessServices"];
+//ArgumentException.ThrowIfNullOrWhiteSpace(dataAccessUrl);
+//builder.Services.AddHttpClient<IDataAccessClient, DataAccessClient>(client =>
+//{
+//    client.BaseAddress = new Uri(dataAccessUrl);
+//});
 
 
 //builder.Services.AddScoped<IMovieService, MovieService>();
