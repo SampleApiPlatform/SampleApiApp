@@ -4,6 +4,8 @@ using SampleAppApi.Interfaces.ExternalServices;
 using SampleAppApi.Services.External;
 using NuGet.SampleSharedModels.Interfaces;
 using NuGet.SampleSharedModels.Services;
+using Dapr.Client;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Load JWT settings
@@ -36,6 +38,7 @@ var builder = WebApplication.CreateBuilder(args);
 //});
 
 
+
 //builder.Services.AddScoped<IMovieService, MovieService>();
 //builder.Services.AddScoped<IValidator<Movie>, MovieValidator>();
 //builder.Services.AddScoped<IValidator<User>, UserValidator>();
@@ -43,6 +46,8 @@ var builder = WebApplication.CreateBuilder(args);
 //builder.Services.AddScoped<IUserRepository, UserRepository>();
 
 //builder.Services.AddSingleton<IPasswordHasher, PasswordHasher>();
+builder.Services.AddScoped<IDataAccessClient, DataAccessClientDapr>();
+
 
 
 //Register AuthService
@@ -115,6 +120,13 @@ builder.Services.AddControllers();
 
 // Authorization
 builder.Services.AddAuthorization();
+// Dapr Client aktivieren (GENAU HIER)
+builder.Services.AddDaprClient();
+builder.Services.AddHttpClient("dapr", c =>
+{
+    c.BaseAddress = new Uri("http://localhost:3500/");
+});
+
 
 var app = builder.Build();
 app.UseMiddleware<GlobalExceptionMiddleware>();
