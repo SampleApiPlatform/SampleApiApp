@@ -8,7 +8,7 @@ var builder = WebApplication.CreateBuilder(args);
 // ---------------------------------------------------------
 // 1️⃣ KeyVaultUri loaded from the Container App Secret
 // ---------------------------------------------------------
-var keyVaultUri = builder.Configuration["KeyVaultUri"];
+var keyVaultUri = builder.Configuration["keyvaulturi"];
 
 if (string.IsNullOrWhiteSpace(keyVaultUri))
 {
