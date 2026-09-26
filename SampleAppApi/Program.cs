@@ -1,12 +1,27 @@
-
+using Azure.Identity;
+using Azure.Extensions.AspNetCore.Configuration.Secrets;
 using SampleAppApi.Extensions;
 using SampleAppApi.Interfaces.ExternalServices;
-using SampleAppApi.Services.External;
-using NuGet.SampleSharedModels.Interfaces;
-using NuGet.SampleSharedModels.Services;
-using Dapr.Client;
+using SampleApi.Options;
 
 var builder = WebApplication.CreateBuilder(args);
+// ---------------------------------------------------------
+// 1️⃣ KeyVaultUri loaded from the Container App Secret
+// ---------------------------------------------------------
+var keyVaultUri = builder.Configuration["KeyVaultUri"];
+
+if (string.IsNullOrWhiteSpace(keyVaultUri))
+{
+    throw new InvalidOperationException("KeyVaultUri configuration value is missing.");
+}
+// ---------------------------------------------------------
+// 2️⃣ Key Vault integrate
+// ---------------------------------------------------
+builder.Configuration.AddAzureKeyVault(
+    new Uri(keyVaultUri),
+    new DefaultAzureCredential());
+
+
 
 // Load JWT settings
 //var jwtSettings = builder.Configuration.GetSection("Jwt");
@@ -92,6 +107,26 @@ builder.Services.AddSwaggerDocumentation();
 
 // Controllers
 builder.Services.AddControllers();
+
+// ---------------------------------------------------------
+// 3️⃣ ServiceTokenOptions load (Tokens from the Key Vault)
+// ---------------------------------------------------------
+builder.Services.Configure<ServiceTokenOptions>(options =>
+{
+    var token1 = builder.Configuration["sampleapiplatform-token-client1"];
+
+    if (string.IsNullOrWhiteSpace(token1))
+    {
+        throw new InvalidOperationException("Token 'sampleapiplatform-token-client1' is missing from Key Vault.");
+    }
+
+    options.ValidTokens.Add(token1);
+});
+
+// ---------------------------------------------------------
+// 4️⃣ Token-Middleware registrieren
+// ---------------------------------------------------------
+builder.Services.AddSingleton<TokenValidationMiddleware>();
 
 // ⭐ Register Authentication + JWT Bearer
 
