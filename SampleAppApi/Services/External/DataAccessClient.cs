@@ -11,11 +11,16 @@ namespace SampleAppApi.Services.External
     {
         private readonly string _category = string.Empty;   
         private readonly HttpClient _httpClient;
-        private readonly ISharedServicesClient _sharedServicesClient;
-        public DataAccessClient(HttpClient httpClient, ISharedServicesClient sharedServicesClient)
+        //private readonly ISharedServicesClient _sharedServicesClient;
+        private readonly ILogger<DataAccessClient> _logger;
+        public DataAccessClient(HttpClient httpClient,
+                                ILogger<DataAccessClient> logger 
+                                //ISharedServicesClient sharedServicesClient
+                                )
         {
             _httpClient = httpClient;
-            _sharedServicesClient = sharedServicesClient;
+            _logger = logger;
+            //_sharedServicesClient = sharedServicesClient;
             _category = this.GetType().Name;
         }
 

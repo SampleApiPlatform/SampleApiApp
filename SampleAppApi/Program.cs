@@ -1,11 +1,8 @@
 using Azure.Identity;
-using Azure.Extensions.AspNetCore.Configuration.Secrets;
 using SampleAppApi.Extensions;
 using SampleAppApi.Interfaces.ExternalServices;
 using SampleApi.Options;
-using NuGet.SampleSharedModels.Interfaces;
-using NuGet.SampleSharedModels.Services;
-using SampleAppApi.Services.External;
+
 
 var builder = WebApplication.CreateBuilder(args);
 // ---------------------------------------------------------
@@ -41,7 +38,7 @@ builder.Configuration.AddAzureKeyVault(
 
 
 // Register services
-builder.Services.AddScoped<ISharedServicesClient, SharedServicesClient>();
+//builder.Services.AddScoped<ISharedServicesClient, SharedServicesClient>();
 //var sharedServicesUrl = builder.Configuration["ServiceUrls:SharedServices"];
 //ArgumentException.ThrowIfNullOrWhiteSpace(sharedServicesUrl);
 //builder.Services.AddHttpClient<ISharedServicesClient, SharedServicesClient>(client =>
@@ -50,11 +47,13 @@ builder.Services.AddScoped<ISharedServicesClient, SharedServicesClient>();
 //});
 
 // Register services
-var dataAccessUrl = builder.Configuration["ServiceUrls:DataAccessServices"];
-ArgumentException.ThrowIfNullOrWhiteSpace(dataAccessUrl);
-builder.Services.AddHttpClient<IDataAccessClient, DataAccessClient>(client =>
+//var dataAccessUrl = builder.Configuration["ServiceUrls:DataAccessServices"];
+//ArgumentException.ThrowIfNullOrWhiteSpace(dataAccessUrl);
+builder.Services.AddHttpClient<IDataAccessClient, DataAccessClientDapr>(client =>
 {
-    client.BaseAddress = new Uri(dataAccessUrl);
+    client.BaseAddress = new Uri("http://localhost:3500");
+    //instruct the dapr sidecar to return an response in less than 504. Otherwise timeout.
+    client.DefaultRequestHeaders.Add("Dapr-TimeoutInSeconds", "30");
 });
 
 

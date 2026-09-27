@@ -8,14 +8,19 @@ using NuGet.SampleSharedModels.Interfaces;
 public class DataAccessClientDapr : IDataAccessClient
 {
     private readonly HttpClient _httpClient;
-    private readonly ISharedServicesClient _sharedServicesClient;
+    //private readonly ISharedServicesClient _sharedServicesClient;
+    private readonly ILogger<DataAccessClientDapr> _logger;
     private readonly string _category = string.Empty;
 
-    public DataAccessClientDapr(IHttpClientFactory httpClientFactory, ISharedServicesClient sharedServicesClient)
+    public DataAccessClientDapr(IHttpClientFactory httpClientFactory, 
+                                    ILogger<DataAccessClientDapr> logger
+                                //ISharedServicesClient sharedServicesClient
+                                )
     {
         // Dapr Sidecar HTTP Port ist IMMER 3500 in Azure Container Apps
         _httpClient = httpClientFactory.CreateClient("dapr");
-        _sharedServicesClient = sharedServicesClient;
+        //_sharedServicesClient = sharedServicesClient;
+        _logger = logger;
         _category = this.GetType().Name;
     }
 
@@ -32,7 +37,8 @@ public class DataAccessClientDapr : IDataAccessClient
         catch (Exception ex)
         {
             var message = $"DataAccessApi unreachable: {ex.Message}";
-            await _sharedServicesClient.LogAsync(_category, $"GetAll Exception: {message}", LogLevel.Error);
+            _logger.LogError("GetAll Exception: {message}", message);
+            //await _sharedServicesClient.LogAsync(_category, $"GetAll Exception: {message}", LogLevel.Error);
             return ServiceResult<IEnumerable<MovieDTORead>>.Fail(new List<string> { message });
         }
     }
@@ -50,7 +56,8 @@ public class DataAccessClientDapr : IDataAccessClient
         catch (Exception ex)
         {
             var message = $"DataAccessApi unreachable: {ex.Message}";
-            await _sharedServicesClient.LogAsync(_category, $"GetById Exception: {message}", LogLevel.Error);
+            _logger.LogError("GetById Exception: {message}", message);
+            //await _sharedServicesClient.LogAsync(_category, $"GetById Exception: {message}", LogLevel.Error);
             return ServiceResult<MovieDTORead>.Fail(new List<string> { message });
         }
     }
@@ -70,7 +77,8 @@ public class DataAccessClientDapr : IDataAccessClient
         catch (Exception ex)
         {
             var message = $"DataAccessApi unreachable: {ex.Message}";
-            await _sharedServicesClient.LogAsync(_category, $"Add Exception: {message}", LogLevel.Error);
+            _logger.LogError("Add Exception: {message}", message);
+            //await _sharedServicesClient.LogAsync(_category, $"Add Exception: {message}", LogLevel.Error);
             return ServiceResult<MovieDTORead>.Fail(new List<string> { message });
         }
     }
@@ -90,7 +98,8 @@ public class DataAccessClientDapr : IDataAccessClient
         catch (Exception ex)
         {
             var message = $"DataAccessApi unreachable: {ex.Message}";
-            await _sharedServicesClient.LogAsync(_category, $"Update Exception: {message}", LogLevel.Error);
+            _logger.LogError("Update Exception: {message}", message);
+            //await _sharedServicesClient.LogAsync(_category, $"Update Exception: {message}", LogLevel.Error);
             return ServiceResult<MovieDTORead>.Fail(new List<string> { message });
         }
     }
@@ -110,7 +119,8 @@ public class DataAccessClientDapr : IDataAccessClient
         catch (Exception ex)
         {
             var message = $"DataAccessApi unreachable: {ex.Message}";
-            await _sharedServicesClient.LogAsync(_category, $"Delete Exception: {message}", LogLevel.Error);
+            _logger.LogError("Delete Exception: {message}", message);
+            //await _sharedServicesClient.LogAsync(_category, $"Delete Exception: {message}", LogLevel.Error);
             return ServiceResult<bool>.Fail(new List<string> { message });
         }
     }

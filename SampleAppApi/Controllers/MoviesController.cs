@@ -18,15 +18,18 @@ namespace SampleAppApi.Controllers;
 [Route("api/movies")]
 public class MoviesController : ControllerBase
 {
-    private readonly ISharedServicesClient _sharedServicesClient;
+    //private readonly ISharedServicesClient _sharedServicesClient;
+    private readonly ILogger<MoviesController> _logger;
     private readonly IDataAccessClient _dataAccessClient;
 
     private readonly string controllerName = string.Empty;
     public MoviesController(
-        ISharedServicesClient sharedServicesClient, 
+        //ISharedServicesClient sharedServicesClient, 
+        ILogger<MoviesController> logger,
         IDataAccessClient dataAccessClient)
     {
-        _sharedServicesClient = sharedServicesClient;
+        //_sharedServicesClient = sharedServicesClient;
+        _logger = logger;
         _dataAccessClient = dataAccessClient;
         controllerName = GetType().Name;
     }
@@ -42,11 +45,12 @@ public class MoviesController : ControllerBase
             {
                 var errorText = ServiceResult<IEnumerable<MovieDTORead>>.ErrorsToString(serviceResult.Errors);
 
-                await _sharedServicesClient.LogAsync(
-                    controllerName,
-                    $"MovieController.GetAll Failed: {errorText}",
-                    LogLevel.Error
-                );
+                _logger.LogError($"MovieController.GetAll Failed: {errorText}");    
+                //await _sharedServicesClient.LogAsync(
+                //    controllerName,
+                //    $"MovieController.GetAll Failed: {errorText}",
+                //    LogLevel.Error
+                //);
 
                 return BadRequest(serviceResult.Errors);
             }
@@ -77,12 +81,12 @@ public class MoviesController : ControllerBase
             if (!serviceResult.Success)
             {
                 var errorText = ServiceResult<IEnumerable<MovieDTORead>>.ErrorsToString(serviceResult.Errors);
-
-                await _sharedServicesClient.LogAsync(
-                    controllerName,
-                    $"MovieController.GetById Failed: {errorText}",
-                    LogLevel.Error
-                );
+                _logger.LogError($"MovieController.GetById Failed: {errorText}");  
+                //await _sharedServicesClient.LogAsync(
+                //    controllerName,
+                //    $"MovieController.GetById Failed: {errorText}",
+                //    LogLevel.Error
+                //);
 
                 return BadRequest(serviceResult.Errors);
             }
@@ -117,12 +121,12 @@ public class MoviesController : ControllerBase
             if (!serviceResult.Success)
             {
                 var errorText = ServiceResult<IEnumerable<MovieDTORead>>.ErrorsToString(serviceResult.Errors);
-
-                await _sharedServicesClient.LogAsync(
-                    controllerName,
-                    $"MovieController.Add Failed: {errorText}",
-                    LogLevel.Error
-                );
+                _logger.LogError($"MovieController.Add Failed: {errorText}");
+                //await _sharedServicesClient.LogAsync(
+                //    controllerName,
+                //    $"MovieController.Add Failed: {errorText}",
+                //    LogLevel.Error
+                //);
 
                 return BadRequest(serviceResult.Errors);
             }
@@ -156,11 +160,12 @@ public class MoviesController : ControllerBase
             {
                 var errorText = ServiceResult<IEnumerable<MovieDTORead>>.ErrorsToString(serviceResult.Errors);
 
-                await _sharedServicesClient.LogAsync(
-                    controllerName,
-                    $"MovieController.Update Failed: {errorText}",
-                    LogLevel.Error
-                );
+                _logger.LogError($"MovieController.Update Failed: {errorText}");    
+                //await _sharedServicesClient.LogAsync(
+                //    controllerName,
+                //    $"MovieController.Update Failed: {errorText}",
+                //    LogLevel.Error
+                //);
 
                 return BadRequest(serviceResult.Errors);
             }
@@ -192,12 +197,12 @@ public class MoviesController : ControllerBase
             if (!serviceResult.Success)
             {
                 var errorText = ServiceResult<IEnumerable<MovieDTORead>>.ErrorsToString(serviceResult.Errors);
-
-                await _sharedServicesClient.LogAsync(
-                    controllerName,
-                    $"MovieController.Delete Failed: {errorText}",
-                    LogLevel.Error
-                );
+                _logger.LogError($"MovieController.Delete Failed: {errorText}");
+                //await _sharedServicesClient.LogAsync(
+                //    controllerName,
+                //    $"MovieController.Delete Failed: {errorText}",
+                //    LogLevel.Error
+                //);
 
                 return BadRequest(serviceResult.Errors);
             }
