@@ -67,7 +67,7 @@ public class MoviesController : ControllerBase
         //}
     }
 
-    [HttpGet]
+    [HttpGet("{id}")]
     public async Task<ActionResult<MovieDTORead>> GetById(string id)
     {
         //try
