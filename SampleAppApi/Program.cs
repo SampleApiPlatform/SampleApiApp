@@ -49,12 +49,13 @@ builder.Configuration.AddAzureKeyVault(
 // Register services
 //var dataAccessUrl = builder.Configuration["ServiceUrls:DataAccessServices"];
 //ArgumentException.ThrowIfNullOrWhiteSpace(dataAccessUrl);
-builder.Services.AddHttpClient<IDataAccessClient, DataAccessClientDapr>(client =>
-{
-    client.BaseAddress = new Uri("http://localhost:3500");
-    //instruct the dapr sidecar to return an response in less than 504. Otherwise timeout.
-    client.DefaultRequestHeaders.Add("Dapr-TimeoutInSeconds", "30");
-});
+//builder.Services.AddHttpClient<IDataAccessClient, DataAccessClientDapr>(client =>
+//{
+//        client.BaseAddress = new Uri("http://localhost:3500");
+//        //instruct the dapr sidecar to return an response in less than 504. Otherwise timeout.
+//        client.DefaultRequestHeaders.Add("Dapr-TimeoutInSeconds", "30");
+//});
+
 
 
 
@@ -159,6 +160,11 @@ builder.Services.AddSingleton<TokenValidationMiddleware>();
 
 // Authorization
 builder.Services.AddAuthorization();
+builder.Services.AddHttpClient("dapr", client =>
+{
+    client.BaseAddress = new Uri("http://localhost:3500/");
+    client.DefaultRequestHeaders.Add("Dapr-TimeoutInSeconds", "30");
+}); 
 // Dapr Client aktivieren (GENAU HIER)
 //builder.Services.AddDaprClient();
 //builder.Services.AddHttpClient("dapr", c =>
@@ -176,6 +182,10 @@ if (app.Environment.IsDevelopment() || app.Environment.IsStaging())
     app.UseSwaggerUI();
 }
 
+//Here we check if the token is valid or not
+//put it before the authentication and Authorization
+//blocks bots/scanners before they hit the auth logic
+app.UseMiddleware<TokenValidationMiddleware>();
 
 // ⭐ Authentication + Authorization middleware
 app.UseAuthentication();
