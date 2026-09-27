@@ -3,6 +3,9 @@ using Azure.Extensions.AspNetCore.Configuration.Secrets;
 using SampleAppApi.Extensions;
 using SampleAppApi.Interfaces.ExternalServices;
 using SampleApi.Options;
+using NuGet.SampleSharedModels.Interfaces;
+using NuGet.SampleSharedModels.Services;
+using SampleAppApi.Services.External;
 
 var builder = WebApplication.CreateBuilder(args);
 // ---------------------------------------------------------
@@ -38,20 +41,20 @@ builder.Configuration.AddAzureKeyVault(
 
 
 // Register services
-//var sharedServicesUrl = builder.Configuration["ServiceUrls:SharedServices"];
-//ArgumentException.ThrowIfNullOrWhiteSpace(sharedServicesUrl);
-//builder.Services.AddHttpClient<ISharedServicesClient, SharedServicesClient>(client =>
-//{
-//    client.BaseAddress = new Uri(sharedServicesUrl);
-//});
+var sharedServicesUrl = builder.Configuration["ServiceUrls:SharedServices"];
+ArgumentException.ThrowIfNullOrWhiteSpace(sharedServicesUrl);
+builder.Services.AddHttpClient<ISharedServicesClient, SharedServicesClient>(client =>
+{
+    client.BaseAddress = new Uri(sharedServicesUrl);
+});
 
 // Register services
-//var dataAccessUrl = builder.Configuration["ServiceUrls:DataAccessServices"];
-//ArgumentException.ThrowIfNullOrWhiteSpace(dataAccessUrl);
-//builder.Services.AddHttpClient<IDataAccessClient, DataAccessClient>(client =>
-//{
-//    client.BaseAddress = new Uri(dataAccessUrl);
-//});
+var dataAccessUrl = builder.Configuration["ServiceUrls:DataAccessServices"];
+ArgumentException.ThrowIfNullOrWhiteSpace(dataAccessUrl);
+builder.Services.AddHttpClient<IDataAccessClient, DataAccessClient>(client =>
+{
+    client.BaseAddress = new Uri(dataAccessUrl);
+});
 
 
 
