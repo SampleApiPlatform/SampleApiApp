@@ -41,12 +41,13 @@ builder.Configuration.AddAzureKeyVault(
 
 
 // Register services
-var sharedServicesUrl = builder.Configuration["ServiceUrls:SharedServices"];
-ArgumentException.ThrowIfNullOrWhiteSpace(sharedServicesUrl);
-builder.Services.AddHttpClient<ISharedServicesClient, SharedServicesClient>(client =>
-{
-    client.BaseAddress = new Uri(sharedServicesUrl);
-});
+builder.Services.AddScoped<ISharedServicesClient, SharedServicesClient>();
+//var sharedServicesUrl = builder.Configuration["ServiceUrls:SharedServices"];
+//ArgumentException.ThrowIfNullOrWhiteSpace(sharedServicesUrl);
+//builder.Services.AddHttpClient<ISharedServicesClient, SharedServicesClient>(client =>
+//{
+//    client.BaseAddress = new Uri(sharedServicesUrl);
+//});
 
 // Register services
 var dataAccessUrl = builder.Configuration["ServiceUrls:DataAccessServices"];
