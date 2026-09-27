@@ -160,11 +160,11 @@ builder.Services.AddSingleton<TokenValidationMiddleware>();
 // Authorization
 builder.Services.AddAuthorization();
 // Dapr Client aktivieren (GENAU HIER)
-builder.Services.AddDaprClient();
-builder.Services.AddHttpClient("dapr", c =>
-{
-    c.BaseAddress = new Uri("http://localhost:3500/");
-});
+//builder.Services.AddDaprClient();
+//builder.Services.AddHttpClient("dapr", c =>
+//{
+//    c.BaseAddress = new Uri("http://localhost:3500/");
+//});
 
 
 var app = builder.Build();
