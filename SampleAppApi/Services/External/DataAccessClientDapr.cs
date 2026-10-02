@@ -28,7 +28,7 @@ public class DataAccessClientDapr : IDataAccessClient
     {
         try
         {
-            var url = "v1.0/invoke/dataaccess/method/movies";
+            var url = "v1.0/invoke/sampledataaccessapi/method/movies";
 
             var result = await _httpClient.GetFromJsonAsync<ServiceResult<IEnumerable<MovieDTORead>>>(url);
 
