@@ -185,7 +185,7 @@ if (app.Environment.IsDevelopment() || app.Environment.IsStaging())
 //Here we check if the token is valid or not
 //put it before the authentication and Authorization
 //blocks bots/scanners before they hit the auth logic
-app.UseMiddleware<TokenValidationMiddleware>();
+//app.UseMiddleware<TokenValidationMiddleware>();
 
 // ⭐ Authentication + Authorization middleware
 app.UseAuthentication();
