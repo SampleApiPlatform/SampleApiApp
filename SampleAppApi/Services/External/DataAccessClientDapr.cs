@@ -53,9 +53,15 @@ public class DataAccessClientDapr : IDataAccessClient
         {
             var url = $"v1.0/invoke/dataaccess/method/movies/{id}";
 
-            var result = await _httpClient.GetFromJsonAsync<ServiceResult<MovieDTORead>>(url);
+            //var result = await _httpClient.GetFromJsonAsync<ServiceResult<MovieDTORead>>(url);
+            //return result!;
+            var movie = await _httpClient.GetFromJsonAsync<MovieDTORead>(url);
+            if (movie == null)
+            {
+                return ServiceResult<MovieDTORead>.Fail(new List<string> { "Movie not found." });
+            }
+            return ServiceResult<MovieDTORead>.Ok(movie);
 
-            return result!;
         }
         catch (Exception ex)
         {
@@ -72,11 +78,32 @@ public class DataAccessClientDapr : IDataAccessClient
         {
             var url = "v1.0/invoke/dataaccess/method/movies";
 
+            //var response = await _httpClient.PostAsJsonAsync(url, movieDTOAdd);
+
+            //var result = await response.Content.ReadFromJsonAsync<ServiceResult<MovieDTORead>>();
+
+            //return result!;
             var response = await _httpClient.PostAsJsonAsync(url, movieDTOAdd);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                return ServiceResult<MovieDTORead>.Fail(new List<string> 
+                { 
+                    $"Request failed with status code: {(int)response.StatusCode}" 
+                });
+            }
 
             var result = await response.Content.ReadFromJsonAsync<ServiceResult<MovieDTORead>>();
 
-            return result!;
+            if (result == null)
+            {
+                return ServiceResult<MovieDTORead>.Fail(new List<string> 
+                { 
+                    "Failed to deserialize the response." 
+                });
+            }
+            return result;
+            
         }
         catch (Exception ex)
         {
@@ -93,11 +120,33 @@ public class DataAccessClientDapr : IDataAccessClient
         {
             var url = $"v1.0/invoke/dataaccess/method/movies/{id}";
 
+            //var response = await _httpClient.PutAsJsonAsync(url, movieDTOUpdate);
+
+            //var result = await response.Content.ReadFromJsonAsync<ServiceResult<MovieDTORead>>();
+
+            //return result!;
+
             var response = await _httpClient.PutAsJsonAsync(url, movieDTOUpdate);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                return ServiceResult<MovieDTORead>.Fail(new List<string> 
+                { 
+                    $"Request failed with status code: {(int)response.StatusCode}" 
+                });
+            }
 
             var result = await response.Content.ReadFromJsonAsync<ServiceResult<MovieDTORead>>();
 
-            return result!;
+            if (result == null)
+            {
+                return ServiceResult<MovieDTORead>.Fail(new List<string> 
+                { 
+                    "Failed to deserialize the response." 
+                });
+            }
+
+            return result;
         }
         catch (Exception ex)
         {
@@ -114,11 +163,32 @@ public class DataAccessClientDapr : IDataAccessClient
         {
             var url = $"v1.0/invoke/dataaccess/method/movies/{id}";
 
+            //var response = await _httpClient.DeleteAsync(url);
+
+            //var result = await response.Content.ReadFromJsonAsync<ServiceResult<bool>>();
+
+            //return result!;
             var response = await _httpClient.DeleteAsync(url);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                return ServiceResult<bool>.Fail(new List<string> 
+                { 
+                    $"Request failed with status code: {(int)response.StatusCode}" 
+                });
+            }
 
             var result = await response.Content.ReadFromJsonAsync<ServiceResult<bool>>();
 
-            return result!;
+            if (result == null)
+            {
+                return ServiceResult<bool>.Fail(new List<string> 
+                { 
+                    "Failed to deserialize the response." 
+                });
+            }
+
+            return result;
         }
         catch (Exception ex)
         {
