@@ -206,7 +206,9 @@ public class DataAccessClientDapr : IDataAccessClient
                     $"Request failed with status code: {(int)response.StatusCode}" 
                 });
             }
-
+            var rawBody = await response.Content.ReadAsStringAsync();
+            _logger.LogInformation("Delete raw body: [{Body}] (length {Len})", rawBody, rawBody.Length);
+            
             var result = await response.Content.ReadFromJsonAsync<ServiceResult<bool>>();
 
             if (result == null)
