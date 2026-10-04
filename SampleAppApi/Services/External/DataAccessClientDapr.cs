@@ -34,10 +34,25 @@ public class DataAccessClientDapr : IDataAccessClient
 
             //var result = await _httpClient.GetFromJsonAsync<ServiceResult<IEnumerable<MovieDTORead>>>(url);
             //return result!;
-            var movies = await _httpClient.GetFromJsonAsync<IEnumerable<MovieDTORead>>(url);
- 
-            return ServiceResult<IEnumerable<MovieDTORead>>.Ok(movies ?? Enumerable.Empty<MovieDTORead>());
+            var result = await _httpClient.GetFromJsonAsync<ServiceResult<IEnumerable<MovieDTORead>>>(url);
 
+            //return ServiceResult<IEnumerable<MovieDTORead>>.Ok(movies ?? Enumerable.Empty<MovieDTORead>());
+            if(result== null)
+            {
+                return ServiceResult<IEnumerable<MovieDTORead>>.Fail(["result is null"]);
+            }
+            else if (!result.Success)
+            {
+                return ServiceResult<IEnumerable<MovieDTORead>>.Fail(result.Errors);
+            } 
+            else if (result.Data == null)
+            {
+                return ServiceResult<IEnumerable<MovieDTORead>>.Fail(["reuslt.Data is null"]);
+            } 
+            else
+            {
+                return ServiceResult<IEnumerable<MovieDTORead>>.Ok(result.Data);
+            }
             
         }
         catch (Exception ex)
@@ -55,14 +70,26 @@ public class DataAccessClientDapr : IDataAccessClient
         {
             var url = $"v1.0/invoke/sampledataaccessapi/method/api/movies/{id}";
 
-            //var result = await _httpClient.GetFromJsonAsync<ServiceResult<MovieDTORead>>(url);
+            var result = await _httpClient.GetFromJsonAsync<ServiceResult<MovieDTORead>>(url);
             //return result!;
-            var movie = await _httpClient.GetFromJsonAsync<MovieDTORead>(url);
-            if (movie == null)
+            //var movie = await _httpClient.GetFromJsonAsync<MovieDTORead>(url);
+            if(result== null)
             {
-                return ServiceResult<MovieDTORead>.Fail(new List<string> { "Movie not found." });
+                return ServiceResult<MovieDTORead>.Fail(["result is null"]);
             }
-            return ServiceResult<MovieDTORead>.Ok(movie);
+            else if (!result.Success)
+            {
+                return ServiceResult<MovieDTORead>.Fail(result.Errors);
+            } 
+            else if (result.Data == null)
+            {
+                return ServiceResult<MovieDTORead>.Fail(["reuslt.Data is null"]);
+            } 
+            else
+            {
+                return ServiceResult<MovieDTORead>.Ok(result.Data);
+            }
+            
 
         }
         catch (Exception ex)
