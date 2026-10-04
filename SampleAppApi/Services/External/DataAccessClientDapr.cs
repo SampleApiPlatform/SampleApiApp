@@ -30,9 +30,13 @@ public class DataAccessClientDapr : IDataAccessClient
         {
             var url = "v1.0/invoke/sampledataaccessapi/method/api/movies";
 
-            var result = await _httpClient.GetFromJsonAsync<ServiceResult<IEnumerable<MovieDTORead>>>(url);
+            //var result = await _httpClient.GetFromJsonAsync<ServiceResult<IEnumerable<MovieDTORead>>>(url);
+            //return result!;
+            var movies = await _httpClient.GetFromJsonAsync<IEnumerable<MovieDTORead>>(url);
+ 
+            return ServiceResult<IEnumerable<MovieDTORead>>.Ok(movies ?? Enumerable.Empty<MovieDTORead>());
 
-            return result!;
+            
         }
         catch (Exception ex)
         {
