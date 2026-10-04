@@ -110,7 +110,7 @@ public class MoviesController : ControllerBase
 
     
 
-    [Authorize]
+    //[Authorize]
     [HttpPost]
     public async Task<IActionResult> Add(MovieDTOAdd movieDTOAdd)
     {
@@ -148,7 +148,7 @@ public class MoviesController : ControllerBase
 
     }
 
-    [Authorize]
+    //[Authorize]
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(string id, MovieDTOUpdate movieDTOUpdate)
     {
@@ -186,7 +186,7 @@ public class MoviesController : ControllerBase
         //}
     }
 
-    [Authorize]
+    //[Authorize]
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(string id)
     {
