@@ -51,7 +51,7 @@ public class DataAccessClientDapr : IDataAccessClient
     {
         try
         {
-            var url = $"v1.0/invoke/dataaccess/method/movies/{id}";
+            var url = $"v1.0/invoke/sampledataaccessapi/method/movies/{id}";
 
             //var result = await _httpClient.GetFromJsonAsync<ServiceResult<MovieDTORead>>(url);
             //return result!;
@@ -76,7 +76,7 @@ public class DataAccessClientDapr : IDataAccessClient
     {
         try
         {
-            var url = "v1.0/invoke/dataaccess/method/movies";
+            var url = "v1.0/invoke/sampledataaccessapi/method/movies";
 
             //var response = await _httpClient.PostAsJsonAsync(url, movieDTOAdd);
 
@@ -118,7 +118,7 @@ public class DataAccessClientDapr : IDataAccessClient
     {
         try
         {
-            var url = $"v1.0/invoke/dataaccess/method/movies/{id}";
+            var url = $"v1.0/invoke/sampledataaccessapi/method/movies/{id}";
 
             //var response = await _httpClient.PutAsJsonAsync(url, movieDTOUpdate);
 
@@ -161,7 +161,7 @@ public class DataAccessClientDapr : IDataAccessClient
     {
         try
         {
-            var url = $"v1.0/invoke/dataaccess/method/movies/{id}";
+            var url = $"v1.0/invoke/sampledataaccessapi/method/movies/{id}";
 
             //var response = await _httpClient.DeleteAsync(url);
 
