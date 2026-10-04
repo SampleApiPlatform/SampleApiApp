@@ -57,7 +57,7 @@ public class DataAccessClientDapr : IDataAccessClient
         }
         catch (Exception ex)
         {
-            var message = $"DataAccessApi unreachable: {ex.Message}";
+            var message = $"SampleDataAccessApi exception: {ex.Message}";
             _logger.LogError("GetAll Exception: {message}", message);
             //await _sharedServicesClient.LogAsync(_category, $"GetAll Exception: {message}", LogLevel.Error);
             return ServiceResult<IEnumerable<MovieDTORead>>.Fail(new List<string> { message });
@@ -94,7 +94,7 @@ public class DataAccessClientDapr : IDataAccessClient
         }
         catch (Exception ex)
         {
-            var message = $"DataAccessApi unreachable: {ex.Message}";
+            var message = $"SampleDataAccessApi exception: {ex.Message}";
             _logger.LogError("GetById Exception: {message}", message);
             //await _sharedServicesClient.LogAsync(_category, $"GetById Exception: {message}", LogLevel.Error);
             return ServiceResult<MovieDTORead>.Fail(new List<string> { message });
@@ -136,7 +136,7 @@ public class DataAccessClientDapr : IDataAccessClient
         }
         catch (Exception ex)
         {
-            var message = $"DataAccessApi unreachable: {ex.Message}";
+            var message = $"SampleDataAccessApi exception: {ex.Message}";
             _logger.LogError("Add Exception: {message}", message);
             //await _sharedServicesClient.LogAsync(_category, $"Add Exception: {message}", LogLevel.Error);
             return ServiceResult<MovieDTORead>.Fail(new List<string> { message });
@@ -179,7 +179,7 @@ public class DataAccessClientDapr : IDataAccessClient
         }
         catch (Exception ex)
         {
-            var message = $"DataAccessApi unreachable: {ex.Message}";
+            var message = $"SampleDataAccessApi exception: {ex.Message}";
             _logger.LogError("Update Exception: {message}", message);
             //await _sharedServicesClient.LogAsync(_category, $"Update Exception: {message}", LogLevel.Error);
             return ServiceResult<MovieDTORead>.Fail(new List<string> { message });
@@ -221,7 +221,7 @@ public class DataAccessClientDapr : IDataAccessClient
         }
         catch (Exception ex)
         {
-            var message = $"DataAccessApi unreachable: {ex.Message}";
+            var message = $"SampleDataAccessApi exception: {ex.Message}";
             _logger.LogError("Delete Exception: {message}", message);
             //await _sharedServicesClient.LogAsync(_category, $"Delete Exception: {message}", LogLevel.Error);
             return ServiceResult<bool>.Fail(new List<string> { message });
