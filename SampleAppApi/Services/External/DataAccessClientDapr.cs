@@ -12,6 +12,8 @@ public class DataAccessClientDapr : IDataAccessClient
     private readonly ILogger<DataAccessClientDapr> _logger;
     private readonly string _category = string.Empty;
 
+    
+
     public DataAccessClientDapr(IHttpClientFactory httpClientFactory, 
                                     ILogger<DataAccessClientDapr> logger
                                 //ISharedServicesClient sharedServicesClient
@@ -51,7 +53,7 @@ public class DataAccessClientDapr : IDataAccessClient
     {
         try
         {
-            var url = $"v1.0/invoke/sampledataaccessapi/method/movies/{id}";
+            var url = $"v1.0/invoke/sampledataaccessapi/method/api/movies/{id}";
 
             //var result = await _httpClient.GetFromJsonAsync<ServiceResult<MovieDTORead>>(url);
             //return result!;
@@ -76,7 +78,7 @@ public class DataAccessClientDapr : IDataAccessClient
     {
         try
         {
-            var url = "v1.0/invoke/sampledataaccessapi/method/movies";
+            var url = "v1.0/invoke/sampledataaccessapi/method/api/movies";
 
             //var response = await _httpClient.PostAsJsonAsync(url, movieDTOAdd);
 
@@ -118,7 +120,7 @@ public class DataAccessClientDapr : IDataAccessClient
     {
         try
         {
-            var url = $"v1.0/invoke/sampledataaccessapi/method/movies/{id}";
+            var url = $"v1.0/invoke/sampledataaccessapi/method/api/movies/{id}";
 
             //var response = await _httpClient.PutAsJsonAsync(url, movieDTOUpdate);
 
@@ -161,7 +163,7 @@ public class DataAccessClientDapr : IDataAccessClient
     {
         try
         {
-            var url = $"v1.0/invoke/sampledataaccessapi/method/movies/{id}";
+            var url = $"v1.0/invoke/sampledataaccessapi/method/api/movies/{id}";
 
             //var response = await _httpClient.DeleteAsync(url);
 
