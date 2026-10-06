@@ -1,14 +1,11 @@
 using NuGet.SampleSharedModels.DTO;
 using NuGet.SampleSharedModels.Results;
 using SampleAppApi.Interfaces.ExternalServices;
-using Microsoft.Extensions.Logging;
-using System.Net.Http.Json;
-using NuGet.SampleSharedModels.Interfaces;
+
 
 public class DataAccessClientDapr : IDataAccessClient
 {
     private readonly HttpClient _httpClient;
-    //private readonly ISharedServicesClient _sharedServicesClient;
     private readonly ILogger<DataAccessClientDapr> _logger;
     private readonly string _category = string.Empty;
 
@@ -16,12 +13,10 @@ public class DataAccessClientDapr : IDataAccessClient
 
     public DataAccessClientDapr(IHttpClientFactory httpClientFactory, 
                                     ILogger<DataAccessClientDapr> logger
-                                //ISharedServicesClient sharedServicesClient
                                 )
     {
         // Dapr Sidecar HTTP Port ist IMMER 3500 in Azure Container Apps
         _httpClient = httpClientFactory.CreateClient("dapr");
-        //_sharedServicesClient = sharedServicesClient;
         _logger = logger;
         _category = this.GetType().Name;
     }
@@ -31,12 +26,7 @@ public class DataAccessClientDapr : IDataAccessClient
         try
         {
             var url = "v1.0/invoke/sampledataaccessapi/method/api/movies";
-
-            //var result = await _httpClient.GetFromJsonAsync<ServiceResult<IEnumerable<MovieDTORead>>>(url);
-            //return result!;
             var result = await _httpClient.GetFromJsonAsync<ServiceResult<IEnumerable<MovieDTORead>>>(url);
-
-            //return ServiceResult<IEnumerable<MovieDTORead>>.Ok(movies ?? Enumerable.Empty<MovieDTORead>());
             if(result== null)
             {
                 return ServiceResult<IEnumerable<MovieDTORead>>.Fail(["result is null"]);
@@ -59,7 +49,6 @@ public class DataAccessClientDapr : IDataAccessClient
         {
             var message = $"SampleDataAccessApi exception: {ex.Message}";
             _logger.LogError("GetAll Exception: {message}", message);
-            //await _sharedServicesClient.LogAsync(_category, $"GetAll Exception: {message}", LogLevel.Error);
             return ServiceResult<IEnumerable<MovieDTORead>>.Fail(new List<string> { message });
         }
     }
@@ -71,8 +60,6 @@ public class DataAccessClientDapr : IDataAccessClient
             var url = $"v1.0/invoke/sampledataaccessapi/method/api/movies/{id}";
 
             var result = await _httpClient.GetFromJsonAsync<ServiceResult<MovieDTORead>>(url);
-            //return result!;
-            //var movie = await _httpClient.GetFromJsonAsync<MovieDTORead>(url);
             if(result== null)
             {
                 return ServiceResult<MovieDTORead>.Fail(["result is null"]);
@@ -96,7 +83,6 @@ public class DataAccessClientDapr : IDataAccessClient
         {
             var message = $"SampleDataAccessApi exception: {ex.Message}";
             _logger.LogError("GetById Exception: {message}", message);
-            //await _sharedServicesClient.LogAsync(_category, $"GetById Exception: {message}", LogLevel.Error);
             return ServiceResult<MovieDTORead>.Fail(new List<string> { message });
         }
     }
@@ -106,12 +92,6 @@ public class DataAccessClientDapr : IDataAccessClient
         try
         {
             var url = "v1.0/invoke/sampledataaccessapi/method/api/movies";
-
-            //var response = await _httpClient.PostAsJsonAsync(url, movieDTOAdd);
-
-            //var result = await response.Content.ReadFromJsonAsync<ServiceResult<MovieDTORead>>();
-
-            //return result!;
             var response = await _httpClient.PostAsJsonAsync(url, movieDTOAdd);
 
             if (!response.IsSuccessStatusCode)
@@ -138,7 +118,6 @@ public class DataAccessClientDapr : IDataAccessClient
         {
             var message = $"SampleDataAccessApi exception: {ex.Message}";
             _logger.LogError("Add Exception: {message}", message);
-            //await _sharedServicesClient.LogAsync(_category, $"Add Exception: {message}", LogLevel.Error);
             return ServiceResult<MovieDTORead>.Fail(new List<string> { message });
         }
     }
@@ -148,12 +127,6 @@ public class DataAccessClientDapr : IDataAccessClient
         try
         {
             var url = $"v1.0/invoke/sampledataaccessapi/method/api/movies/{id}";
-
-            //var response = await _httpClient.PutAsJsonAsync(url, movieDTOUpdate);
-
-            //var result = await response.Content.ReadFromJsonAsync<ServiceResult<MovieDTORead>>();
-
-            //return result!;
 
             var response = await _httpClient.PutAsJsonAsync(url, movieDTOUpdate);
 
@@ -181,7 +154,6 @@ public class DataAccessClientDapr : IDataAccessClient
         {
             var message = $"SampleDataAccessApi exception: {ex.Message}";
             _logger.LogError("Update Exception: {message}", message);
-            //await _sharedServicesClient.LogAsync(_category, $"Update Exception: {message}", LogLevel.Error);
             return ServiceResult<MovieDTORead>.Fail(new List<string> { message });
         }
     }
@@ -191,12 +163,6 @@ public class DataAccessClientDapr : IDataAccessClient
         try
         {
             var url = $"v1.0/invoke/sampledataaccessapi/method/api/movies/{id}";
-
-            //var response = await _httpClient.DeleteAsync(url);
-
-            //var result = await response.Content.ReadFromJsonAsync<ServiceResult<bool>>();
-
-            //return result!;
             var response = await _httpClient.DeleteAsync(url);
 
             if (!response.IsSuccessStatusCode)
@@ -225,7 +191,6 @@ public class DataAccessClientDapr : IDataAccessClient
         {
             var message = $"SampleDataAccessApi exception: {ex.Message}";
             _logger.LogError("Delete Exception: {message}", message);
-            //await _sharedServicesClient.LogAsync(_category, $"Delete Exception: {message}", LogLevel.Error);
             return ServiceResult<bool>.Fail(new List<string> { message });
         }
     }
