@@ -2,6 +2,8 @@ using Azure.Identity;
 using SampleAppApi.Extensions;
 using SampleAppApi.Interfaces.ExternalServices;
 using SampleApi.Options;
+using Microsoft.Identity.Web;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -53,6 +55,12 @@ builder.Services.AddSingleton<TokenValidationMiddleware>();
 // ⭐ Register Authentication + JWT Bearer
 
 // Authorization
+builder.Services.AddControllersWithViews();
+    //.AddMicrosoftIdentityUI();
+//builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
+//    .AddMicrosoftIdentityWebApp(builder.Configuration.GetSection("AzureAd"));
+builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAd"));
 builder.Services.AddAuthorization();
 builder.Services.AddHttpClient("dapr", client =>
 {
