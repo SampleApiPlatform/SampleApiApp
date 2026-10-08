@@ -15,6 +15,7 @@ namespace SampleAppApi.Controllers;
 
 [ApiController]
 [Route("api/movies")]
+[Authorize(Policy = "AccessAsUser")]
 public class MoviesController : ControllerBase
 {
     private readonly ILogger<MoviesController> _logger;
@@ -67,7 +68,7 @@ public class MoviesController : ControllerBase
 
     
 
-    [Authorize]
+    //[Authorize]
     [HttpPost]
     public async Task<IActionResult> Add(MovieDTOAdd movieDTOAdd)
     {
@@ -83,7 +84,7 @@ public class MoviesController : ControllerBase
             return Ok(serviceResult.Data);
     }
 
-    [Authorize]
+    //[Authorize]
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(string id, MovieDTOUpdate movieDTOUpdate)
     {
@@ -99,7 +100,7 @@ public class MoviesController : ControllerBase
             return Ok(serviceResult.Data);
     }
 
-    [Authorize]
+    //[Authorize]
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(string id)
     {

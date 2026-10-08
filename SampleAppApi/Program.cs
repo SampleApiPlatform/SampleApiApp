@@ -61,7 +61,35 @@ builder.Services.AddControllersWithViews();
 //    .AddMicrosoftIdentityWebApp(builder.Configuration.GetSection("AzureAd"));
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAd"));
-builder.Services.AddAuthorization();
+// Accept BOTH the App ID URI (v1 tokens) and the Client ID (v2 tokens).
+// This makes validation robust regardless of which token version a client requests.
+builder.Services.Configure<JwtBearerOptions>(
+    JwtBearerDefaults.AuthenticationScheme,
+    options =>
+    {
+        var clientId = builder.Configuration["AzureAd:ClientId"];
+        var appIdUri = builder.Configuration["AzureAd:Audience"];
+
+        options.TokenValidationParameters.ValidAudiences = new[]
+        {
+            appIdUri,   // api://f9a3d163-e6e5-481b-9ea9-869076084bc7  (v1 tokens)
+            clientId    // f9a3d163-e6e5-481b-9ea9-869076084bc7          (v2 tokens)
+        };
+
+        // Fail fast on clock skew rather than silently accepting stale tokens
+        options.TokenValidationParameters.ClockSkew = TimeSpan.FromMinutes(2);
+    });
+
+
+//builder.Services.AddAuthorization();
+// 3. Register the scope policy
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("AccessAsUser", policy =>
+        policy.RequireAssertion(ctx =>
+            ctx.User.HasClaim(c => c.Type == "scp" && c.Value.Split(' ').Contains("access_as_user")) ||
+            ctx.User.HasClaim(c => c.Type == "scp2" && c.Value.Split(' ').Contains("access_as_user"))));
+});
 builder.Services.AddHttpClient("dapr", client =>
 {
     client.BaseAddress = new Uri("http://localhost:3500/");
