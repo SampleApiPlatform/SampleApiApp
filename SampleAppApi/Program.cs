@@ -61,11 +61,15 @@ builder.Services.AddControllersWithViews();
 //    .AddMicrosoftIdentityWebApp(builder.Configuration.GetSection("AzureAd"));
 //builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 //    .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAd"));
+// 1. Authentication & JWT Bearer
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddMicrosoftIdentityWebApi(
         jwtBearerOptions =>
         {
-            // Set audiences INSIDE this callback so they aren't overwritten later
+            // ✅ Fix: Disable inbound claim mapping to keep claim types as 'scp', 'oid', etc.
+            jwtBearerOptions.MapInboundClaims = false;
+
+            // ✅ Fix: Set audiences inside this callback so they aren't overwritten
             jwtBearerOptions.TokenValidationParameters.ValidAudiences = new[]
             {
                 "api://f9a3d163-e6e5-481b-9ea9-869076084bc7",  // v1 tokens (App ID URI)
@@ -79,6 +83,24 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             microsoftIdentityOptions.TenantId = builder.Configuration["AzureAd:TenantId"];
             microsoftIdentityOptions.ClientId = builder.Configuration["AzureAd:ClientId"];
         });
+
+// 2. Authorization Policy
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("AccessAsUser", policy =>
+        policy.RequireAssertion(ctx =>
+        {
+            // Now 'scp' will match the actual claim type in the token
+            var scopeClaim = ctx.User.FindFirst(c => c.Type == "scp" || c.Type == "scp2");
+            
+            if (scopeClaim == null) return false;
+
+            var scopes = scopeClaim.Value.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            return scopes.Contains("access_as_user", StringComparer.OrdinalIgnoreCase);
+        }));
+});
+
+
 // Accept BOTH the App ID URI (v1 tokens) and the Client ID (v2 tokens).
 // This makes validation robust regardless of which token version a client requests.
 //builder.Services.Configure<JwtBearerOptions>(
@@ -107,32 +129,21 @@ builder.Services.AddAuthorization(options =>
         policy.RequireAssertion(ctx =>
         {
             // Debug: Print all claims to the console
-            if (ctx.User.Identity.IsAuthenticated)
+            if (ctx.User.Identity?.IsAuthenticated == true)
             {
                 var claims = string.Join(", ", ctx.User.Claims.Select(c => $"{c.Type}: '{c.Value}'"));
                 Console.WriteLine($"DEBUG CLAIMS: {claims}");
                 
-                // Specific check for scope claims
                 var scp = ctx.User.FindFirst("scp")?.Value;
-                var scp2 = ctx.User.FindFirst("scp2")?.Value;
                 Console.WriteLine($"DEBUG scp: '{scp}'");
-                Console.WriteLine($"DEBUG scp2: '{scp2}'");
             }
 
-            // Check for 'scp' (v1) or 'scp2' (v2)
             var scopeClaim = ctx.User.FindFirst(c => c.Type == "scp" || c.Type == "scp2");
             
-            if (scopeClaim == null)
-            {
-                Console.WriteLine("DEBUG: No scope claim found (scp or scp2)");
-                return false;
-            }
+            if (scopeClaim == null) return false;
 
             var scopes = scopeClaim.Value.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-            bool hasScope = scopes.Any(s => s.Equals("access_as_user", StringComparison.OrdinalIgnoreCase));
-            
-            Console.WriteLine($"DEBUG: Scope check result: {hasScope}");
-            return hasScope;
+            return scopes.Contains("access_as_user", StringComparer.OrdinalIgnoreCase);
         }));
 });
 builder.Services.AddHttpClient("dapr", client =>
@@ -140,7 +151,6 @@ builder.Services.AddHttpClient("dapr", client =>
     client.BaseAddress = new Uri("http://localhost:3500/");
     client.DefaultRequestHeaders.Add("Dapr-TimeoutInSeconds", "30");
 }); 
-
 
 var app = builder.Build();
 //app.UseMiddleware<GlobalExceptionMiddleware>();
