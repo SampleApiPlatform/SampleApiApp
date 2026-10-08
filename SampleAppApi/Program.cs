@@ -59,26 +59,44 @@ builder.Services.AddControllersWithViews();
     //.AddMicrosoftIdentityUI();
 //builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
 //    .AddMicrosoftIdentityWebApp(builder.Configuration.GetSection("AzureAd"));
+//builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+//    .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAd"));
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAd"));
+    .AddMicrosoftIdentityWebApi(
+        jwtBearerOptions =>
+        {
+            // Set audiences INSIDE this callback so they aren't overwritten later
+            jwtBearerOptions.TokenValidationParameters.ValidAudiences = new[]
+            {
+                "api://f9a3d163-e6e5-481b-9ea9-869076084bc7",  // v1 tokens (App ID URI)
+                "f9a3d163-e6e5-481b-9ea9-869076084bc7"          // v2 tokens (client ID)
+            };
+            jwtBearerOptions.TokenValidationParameters.ClockSkew = TimeSpan.FromMinutes(2);
+        },
+        microsoftIdentityOptions =>
+        {
+            microsoftIdentityOptions.Instance = builder.Configuration["AzureAd:Instance"] ?? "https://login.microsoftonline.com/";
+            microsoftIdentityOptions.TenantId = builder.Configuration["AzureAd:TenantId"];
+            microsoftIdentityOptions.ClientId = builder.Configuration["AzureAd:ClientId"];
+        });
 // Accept BOTH the App ID URI (v1 tokens) and the Client ID (v2 tokens).
 // This makes validation robust regardless of which token version a client requests.
-builder.Services.Configure<JwtBearerOptions>(
-    JwtBearerDefaults.AuthenticationScheme,
-    options =>
-    {
-        var clientId = builder.Configuration["AzureAd:ClientId"];
-        var appIdUri = builder.Configuration["AzureAd:Audience"];
-
-        options.TokenValidationParameters.ValidAudiences = new[]
-        {
-            appIdUri,   // api://f9a3d163-e6e5-481b-9ea9-869076084bc7  (v1 tokens)
-            clientId    // f9a3d163-e6e5-481b-9ea9-869076084bc7          (v2 tokens)
-        };
-
-        // Fail fast on clock skew rather than silently accepting stale tokens
-        options.TokenValidationParameters.ClockSkew = TimeSpan.FromMinutes(2);
-    });
+//builder.Services.Configure<JwtBearerOptions>(
+//    JwtBearerDefaults.AuthenticationScheme,
+//    options =>
+//    {
+//        var clientId = builder.Configuration["AzureAd:ClientId"];
+//        var appIdUri = builder.Configuration["AzureAd:Audience"];
+//
+//        options.TokenValidationParameters.ValidAudiences = new[]
+//        {
+//            appIdUri,   // api://f9a3d163-e6e5-481b-9ea9-869076084bc7  (v1 tokens)
+//            clientId    // f9a3d163-e6e5-481b-9ea9-869076084bc7          (v2 tokens)
+//        };
+//
+//        // Fail fast on clock skew rather than silently accepting stale tokens
+//        options.TokenValidationParameters.ClockSkew = TimeSpan.FromMinutes(2);
+//    });
 
 
 //builder.Services.AddAuthorization();
