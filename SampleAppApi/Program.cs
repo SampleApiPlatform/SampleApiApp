@@ -106,13 +106,33 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("AccessAsUser", policy =>
         policy.RequireAssertion(ctx =>
         {
-            // Check both 'scp' (v1) and 'scp2' (v2) claims
-            var scopeClaim = ctx.User.FindFirst(c => c.Type == "scp" || c.Type == "scp2");
-            if (scopeClaim == null) return false;
+            // Debug: Print all claims to the console
+            if (ctx.User.Identity.IsAuthenticated)
+            {
+                var claims = string.Join(", ", ctx.User.Claims.Select(c => $"{c.Type}: '{c.Value}'"));
+                Console.WriteLine($"DEBUG CLAIMS: {claims}");
+                
+                // Specific check for scope claims
+                var scp = ctx.User.FindFirst("scp")?.Value;
+                var scp2 = ctx.User.FindFirst("scp2")?.Value;
+                Console.WriteLine($"DEBUG scp: '{scp}'");
+                Console.WriteLine($"DEBUG scp2: '{scp2}'");
+            }
 
-            // Split by space and check if 'access_as_user' is one of the scopes
+            // Check for 'scp' (v1) or 'scp2' (v2)
+            var scopeClaim = ctx.User.FindFirst(c => c.Type == "scp" || c.Type == "scp2");
+            
+            if (scopeClaim == null)
+            {
+                Console.WriteLine("DEBUG: No scope claim found (scp or scp2)");
+                return false;
+            }
+
             var scopes = scopeClaim.Value.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-            return scopes.Contains("access_as_user", StringComparer.OrdinalIgnoreCase);
+            bool hasScope = scopes.Any(s => s.Equals("access_as_user", StringComparison.OrdinalIgnoreCase));
+            
+            Console.WriteLine($"DEBUG: Scope check result: {hasScope}");
+            return hasScope;
         }));
 });
 builder.Services.AddHttpClient("dapr", client =>
