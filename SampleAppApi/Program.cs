@@ -105,8 +105,15 @@ builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("AccessAsUser", policy =>
         policy.RequireAssertion(ctx =>
-            ctx.User.HasClaim(c => c.Type == "scp" && c.Value.Split(' ').Contains("access_as_user")) ||
-            ctx.User.HasClaim(c => c.Type == "scp2" && c.Value.Split(' ').Contains("access_as_user"))));
+        {
+            // Check both 'scp' (v1) and 'scp2' (v2) claims
+            var scopeClaim = ctx.User.FindFirst(c => c.Type == "scp" || c.Type == "scp2");
+            if (scopeClaim == null) return false;
+
+            // Split by space and check if 'access_as_user' is one of the scopes
+            var scopes = scopeClaim.Value.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+            return scopes.Contains("access_as_user", StringComparer.OrdinalIgnoreCase);
+        }));
 });
 builder.Services.AddHttpClient("dapr", client =>
 {
