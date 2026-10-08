@@ -62,19 +62,17 @@ builder.Services.AddControllersWithViews();
 //builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 //    .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAd"));
 // 1. Authentication & JWT Bearer
+var clientId = builder.Configuration["AzureAd:ClientId"];
+var appIdUri = builder.Configuration["AzureAd:Audience"];
+var scope    = builder.Configuration["AzureAd:Scope"] ?? "access_as_user";
+
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddMicrosoftIdentityWebApi(
         jwtBearerOptions =>
         {
-            // ✅ Fix: Disable inbound claim mapping to keep claim types as 'scp', 'oid', etc.
             jwtBearerOptions.MapInboundClaims = false;
 
-            // ✅ Fix: Set audiences inside this callback so they aren't overwritten
-            jwtBearerOptions.TokenValidationParameters.ValidAudiences = new[]
-            {
-                "api://f9a3d163-e6e5-481b-9ea9-869076084bc7",  // v1 tokens (App ID URI)
-                "f9a3d163-e6e5-481b-9ea9-869076084bc7"          // v2 tokens (client ID)
-            };
+            jwtBearerOptions.TokenValidationParameters.ValidAudiences = new[] { appIdUri, clientId };
             jwtBearerOptions.TokenValidationParameters.ClockSkew = TimeSpan.FromMinutes(2);
         },
         microsoftIdentityOptions =>
@@ -84,19 +82,22 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             microsoftIdentityOptions.ClientId = builder.Configuration["AzureAd:ClientId"];
         });
 
+
+
+
+
+
 // 2. Authorization Policy
 builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("AccessAsUser", policy =>
         policy.RequireAssertion(ctx =>
         {
-            // Now 'scp' will match the actual claim type in the token
             var scopeClaim = ctx.User.FindFirst(c => c.Type == "scp" || c.Type == "scp2");
-            
             if (scopeClaim == null) return false;
 
             var scopes = scopeClaim.Value.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-            return scopes.Contains("access_as_user", StringComparer.OrdinalIgnoreCase);
+            return scopes.Contains(scope, StringComparer.OrdinalIgnoreCase);
         }));
 });
 
@@ -132,10 +133,10 @@ builder.Services.AddAuthorization(options =>
             if (ctx.User.Identity?.IsAuthenticated == true)
             {
                 var claims = string.Join(", ", ctx.User.Claims.Select(c => $"{c.Type}: '{c.Value}'"));
-                Console.WriteLine($"DEBUG CLAIMS: {claims}");
+                //Console.WriteLine($"DEBUG CLAIMS: {claims}");
                 
                 var scp = ctx.User.FindFirst("scp")?.Value;
-                Console.WriteLine($"DEBUG scp: '{scp}'");
+                //Console.WriteLine($"DEBUG scp: '{scp}'");
             }
 
             var scopeClaim = ctx.User.FindFirst(c => c.Type == "scp" || c.Type == "scp2");
