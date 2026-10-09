@@ -26,7 +26,7 @@ builder.Configuration.AddAzureKeyVault(
     new Uri(keyVaultUri),
     new DefaultAzureCredential());
     
-var clientSecret = builder.Configuration["AzureAd--ClientSecret"];
+var clientSecret = builder.Configuration["AzureAdClientSecret"];
 if (string.IsNullOrWhiteSpace(clientSecret))
 {
     throw new InvalidOperationException("ClientSecret not found in Key Vault.");
