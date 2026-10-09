@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace SampleAppApi.Controllers;
@@ -7,6 +8,13 @@ namespace SampleAppApi.Controllers;
 public class AuthController : ControllerBase
 {
     private readonly IConfiguration _config;
+
+    [HttpGet("whoami")]
+    [Authorize]   // kein Policy -> loest den OIDC-Redirect aus
+    public IActionResult WhoAmI()
+    {
+        return Ok(User.Claims.Select(c => new { c.Type, c.Value }));
+    }
 
     public AuthController(IConfiguration config)
     {
