@@ -25,6 +25,13 @@ if (string.IsNullOrWhiteSpace(keyVaultUri))
 builder.Configuration.AddAzureKeyVault(
     new Uri(keyVaultUri),
     new DefaultAzureCredential());
+    
+var clientSecret = builder.Configuration["AzureAd--ClientSecret"];
+if (string.IsNullOrWhiteSpace(clientSecret))
+{
+    throw new InvalidOperationException("ClientSecret not found in Key Vault.");
+}
+builder.Configuration["AzureAd:ClientSecret"] = clientSecret;
 
 builder.Services.AddScoped<IDataAccessClient, DataAccessClientDapr>();
 
