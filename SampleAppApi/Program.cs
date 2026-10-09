@@ -4,6 +4,8 @@ using SampleAppApi.Interfaces.ExternalServices;
 using SampleApi.Options;
 using Microsoft.Identity.Web;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.Identity.Web.TokenCacheProviders.InMemory;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -64,9 +66,9 @@ builder.Services.AddControllersWithViews();
 // 1. Authentication & JWT Bearer
 var clientId = builder.Configuration["AzureAd:ClientId"];
 var appIdUri = builder.Configuration["AzureAd:Audience"];
-var scope    = builder.Configuration["AzureAd:Scope"] ?? "access_as_user";
+//var scope    = builder.Configuration["AzureAd:Scope"] ?? "access_as_user";
 
-builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+/*builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddMicrosoftIdentityWebApi(
         jwtBearerOptions =>
         {
@@ -80,15 +82,32 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             microsoftIdentityOptions.Instance = builder.Configuration["AzureAd:Instance"] ?? "https://login.microsoftonline.com/";
             microsoftIdentityOptions.TenantId = builder.Configuration["AzureAd:TenantId"];
             microsoftIdentityOptions.ClientId = builder.Configuration["AzureAd:ClientId"];
-        });
+        });*/
 
+// ---------------------------------------------------------
+// 1) OIDC = Browser-Login (Redirect, Cookie-Session)
+// ---------------------------------------------------------
+builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
+    .AddMicrosoftIdentityWebApp(builder.Configuration.GetSection("AzureAd"))
+        .EnableTokenAcquisitionToCallDownstreamApi()
+        .AddInMemoryTokenCaches();
 
+builder.Services.AddAuthentication()
+    .AddMicrosoftIdentityWebApi(
+        jwtBearerOptions =>
+        {
+            jwtBearerOptions.MapInboundClaims = false;
+            jwtBearerOptions.TokenValidationParameters.ValidAudiences = new[] { appIdUri, clientId };
+            jwtBearerOptions.TokenValidationParameters.ClockSkew = TimeSpan.FromMinutes(2);
+        },
+        microsoftIdentityOptions => { },
+        JwtBearerDefaults.AuthenticationScheme);
 
 
 
 
 // 2. Authorization Policy
-builder.Services.AddAuthorization(options =>
+/*builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("AccessAsUser", policy =>
         policy.RequireAssertion(ctx =>
@@ -99,7 +118,7 @@ builder.Services.AddAuthorization(options =>
             var scopes = scopeClaim.Value.Split(' ', StringSplitOptions.RemoveEmptyEntries);
             return scopes.Contains(scope, StringComparer.OrdinalIgnoreCase);
         }));
-});
+});*/
 
 
 // Accept BOTH the App ID URI (v1 tokens) and the Client ID (v2 tokens).
@@ -124,7 +143,7 @@ builder.Services.AddAuthorization(options =>
 
 //builder.Services.AddAuthorization();
 // 3. Register the scope policy
-builder.Services.AddAuthorization(options =>
+/*builder.Services.AddAuthorization(options =>
 {
     options.AddPolicy("AccessAsUser", policy =>
         policy.RequireAssertion(ctx =>
@@ -146,7 +165,25 @@ builder.Services.AddAuthorization(options =>
             var scopes = scopeClaim.Value.Split(' ', StringSplitOptions.RemoveEmptyEntries);
             return scopes.Contains("access_as_user", StringComparer.OrdinalIgnoreCase);
         }));
+});*/
+var scope = builder.Configuration["AzureAd:Scope"] ?? "access_as_user";
+
+builder.Services.AddAuthorization(options =>
+{
+    options.AddPolicy("AccessAsUser", policy =>
+        policy.RequireAssertion(ctx =>
+        {
+            var scopeClaim = ctx.User.FindFirst(c => c.Type == "scp");
+            if (scopeClaim is null) return false;
+
+            return scopeClaim.Value
+                .Split(' ', StringSplitOptions.RemoveEmptyEntries)
+                .Contains(scope, StringComparer.OrdinalIgnoreCase);
+        }));
 });
+
+
+
 builder.Services.AddHttpClient("dapr", client =>
 {
     client.BaseAddress = new Uri("http://localhost:3500/");
