@@ -30,17 +30,6 @@ public class TokenValidationMiddleware
                 return;
             }
         }
-        if (context.Request.Path.StartsWithSegments("/auth"))
-        {
-            var token = context.Request.Headers["X-Service-Token"].FirstOrDefault();
-
-            if (string.IsNullOrWhiteSpace(token) || !_options.ValidTokens.Contains(token))
-            {
-                context.Response.StatusCode = StatusCodes.Status401Unauthorized;
-                await context.Response.WriteAsync("Invalid or missing service token.");
-                return;
-            }
-        }
         await _next(context);
     }
 }
