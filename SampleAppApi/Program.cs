@@ -36,6 +36,10 @@ if (string.IsNullOrWhiteSpace(keyVaultUri))
 builder.Configuration.AddAzureKeyVault(
     new Uri(keyVaultUri),
     new DefaultAzureCredential());
+
+//DEBUG
+var test = builder.Configuration["AzureAdClientSecret1"];
+Console.WriteLine($"[KV] AzureAdClientSecret1 visible: {(string.IsNullOrEmpty(test) ? "NO" : $"YES (len={test.Length})")}");
     
 
 
