@@ -128,8 +128,8 @@ Console.WriteLine($"[DIAG] AzureAd:ClientSecret set: {(string.IsNullOrEmpty(veri
 //Authetication logging into Microsoft and getting to get the JWT
 builder.Configuration["AzureAd:CallbackPath"] = "/signin-oidc";
 builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
-    .AddMicrosoftIdentityWebApp(builder.Configuration.GetSection("AzureAd"));
-    //.EnableTokenAcquisitionToCallDownstreamApi(new[] { "api://f9a3d163-e6e5-481b-9ea9-869076084bc7/access_as_user" })
+    .AddMicrosoftIdentityWebApp(builder.Configuration.GetSection("AzureAd"))
+    .EnableTokenAcquisitionToCallDownstreamApi(new[] { "api://f9a3d163-e6e5-481b-9ea9-869076084bc7/access_as_user" });
     //.AddInMemoryTokenCaches();
 // Both of these are IServiceCollection extensions now, not chain methods.
 // Authorization code flow. Without this Identity.Web sends response_type=id_token
