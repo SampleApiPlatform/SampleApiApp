@@ -136,7 +136,12 @@ builder.Services.AddAuthentication()
             jwtBearerOptions.TokenValidationParameters.ValidAudiences = new[] { appIdUri, clientId };
             jwtBearerOptions.TokenValidationParameters.ClockSkew = TimeSpan.FromMinutes(2);
         },
-        microsoftIdentityOptions => { },
+        microsoftIdentityOptions =>
+        {
+            microsoftIdentityOptions.Instance = builder.Configuration["AzureAd:Instance"] ?? "https://login.microsoftonline.com/";
+            microsoftIdentityOptions.TenantId  = builder.Configuration["AzureAd:TenantId"];
+            microsoftIdentityOptions.ClientId  = builder.Configuration["AzureAd:ClientId"];
+        },
         JwtBearerDefaults.AuthenticationScheme);
 
 
