@@ -47,8 +47,10 @@ public class AuthController : ControllerBase
         try
         {
             // Request an access token for your API (same audience)
-            var accessToken = await _tokenAcquisition.GetAccessTokenForUserAsync(
-                scopes: new[] { "api://f9a3d163-e6e5-481b-9ea9-869076084bc7/access_as_user" });
+            //var accessToken = await _tokenAcquisition.GetAccessTokenForUserAsync(
+            //    scopes: new[] { "api://f9a3d163-e6e5-481b-9ea9-869076084bc7/access_as_user" });
+            
+            var accessToken = await HttpContext.GetTokenAsync("access_token");
 
             return Ok(new
             {
