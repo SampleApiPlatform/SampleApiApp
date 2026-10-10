@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.HttpOverrides;
 
 
 var builder = WebApplication.CreateBuilder(args);
-// EARLIEST POSSIBLE DIAG
+// DEBUG EARLIEST POSSIBLE DIAG
 Console.WriteLine("=== STARTUP v3 ===");
 
 //This is for the redirect microsoft login
