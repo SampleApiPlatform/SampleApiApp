@@ -248,8 +248,11 @@ app.MapWhen(
             var lines = new[]
             {
                 $"AzureAdClientSecret1   : {(string.IsNullOrEmpty(cfg["AzureAdClientSecret1"]) ? "EMPTY" : $"len={cfg["AzureAdClientSecret1"]!.Length}")}",
+                $"AzureAd:ClientSecret   : {(string.IsNullOrEmpty(cfg["AzureAd:ClientSecret"]) ? "EMPTY" : $"len={cfg["AzureAd:ClientSecret"]!.Length}")}",
                 $"AzureAd:ClientId       : {cfg["AzureAd:ClientId"] ?? "NULL"}",
                 $"AzureAd:TenantId       : {cfg["AzureAd:TenantId"] ?? "NULL"}",
+                $"AzureAd:Instance       : {cfg["AzureAd:Instance"] ?? "NULL"}",
+                $"AzureAd:CallbackPath   : {cfg["AzureAd:CallbackPath"] ?? "NULL"}",
             };
             await context.Response.WriteAsync(string.Join("\n", lines));
         });
