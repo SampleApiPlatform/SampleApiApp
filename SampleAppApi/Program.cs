@@ -102,12 +102,20 @@ var appIdUri = builder.Configuration["AzureAd:Audience"];
 // ---------------------------------------------------------
 
 var clientSecret = builder.Configuration["AzureAdClientSecret1"];
+
+//DEBUG
+Console.WriteLine($"[DIAG] KV secret read: {(string.IsNullOrEmpty(clientSecret) ? "EMPTY" : $"len={clientSecret.Length}")}");
+//
 if (string.IsNullOrWhiteSpace(clientSecret))
 {
     throw new InvalidOperationException("ClientSecret not found in Key Vault.");
 }
 builder.Configuration["AzureAd:ClientSecret"] = clientSecret;
 
+//DEBUG
+var verify = builder.Configuration["AzureAd:ClientSecret"];
+Console.WriteLine($"[DIAG] AzureAd:ClientSecret set: {(string.IsNullOrEmpty(verify) ? "EMPTY" : $"len={verify.Length}")}");
+//
 builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
     .AddMicrosoftIdentityWebApp(builder.Configuration.GetSection("AzureAd"))
         .EnableTokenAcquisitionToCallDownstreamApi(new[] { "User.Read" })
