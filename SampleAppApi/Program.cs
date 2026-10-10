@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Identity.Web.TokenCacheProviders.InMemory;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -131,6 +132,26 @@ builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
     //.EnableTokenAcquisitionToCallDownstreamApi(new[] { "api://f9a3d163-e6e5-481b-9ea9-869076084bc7/access_as_user" })
     //.AddInMemoryTokenCaches();
 // Both of these are IServiceCollection extensions now, not chain methods.
+// Authorization code flow. Without this Identity.Web sends response_type=id_token
+// and Entra rejects it with AADSTS700054.
+builder.Services.Configure<OpenIdConnectOptions>(
+    OpenIdConnectDefaults.AuthenticationScheme,
+    options =>
+    {
+        options.ResponseType = OpenIdConnectResponseType.Code;
+        options.SaveTokens = true;
+        options.GetClaimsFromUserInfoEndpoint = true;
+
+        // Surface login failures as readable text instead of a bare 500.
+        options.Events.OnRemoteFailure = ctx =>
+        {
+            ctx.HandleResponse();
+            ctx.Response.StatusCode = StatusCodes.Status401Unauthorized;
+            ctx.Response.ContentType = "text/plain";
+            return ctx.Response.WriteAsync($"Login failed: {ctx.Failure?.Message}");
+        };
+    });
+
 builder.Services.AddTokenAcquisition();
 builder.Services.AddInMemoryTokenCaches();
 
