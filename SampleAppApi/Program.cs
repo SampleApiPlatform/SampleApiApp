@@ -41,6 +41,7 @@ builder.Configuration.AddAzureKeyVault(
 
 //DEBUG
 var test = builder.Configuration["AzureAdClientSecret1"];
+File.WriteAllText("/tmp/secret_check.txt", $"Len={test?.Length ?? -1}");
 Console.WriteLine($"[KV] AzureAdClientSecret1 visible: {(string.IsNullOrEmpty(test) ? "NO" : $"YES (len={test.Length})")}");
     
 
@@ -226,6 +227,16 @@ builder.Services.AddHttpClient("dapr", client =>
 }); 
 
 var app = builder.Build();
+
+//DEBUG
+app.MapGet("/check-secret", () =>
+{
+    if (File.Exists("/tmp/secret_check.txt"))
+        return File.ReadAllText("/tmp/secret_check.txt");
+    return "File not found";
+});
+//
+
 // For the microsoft login ⭐ MUST be first — fixes Scheme/Host from X-Forwarded-* headers
 app.UseForwardedHeaders();
 
