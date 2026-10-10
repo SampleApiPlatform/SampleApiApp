@@ -229,12 +229,18 @@ builder.Services.AddHttpClient("dapr", client =>
 var app = builder.Build();
 
 //DEBUG
-app.MapGet("/check-secret", () =>
-{
-    if (File.Exists("/tmp/secret_check.txt"))
-        return File.ReadAllText("/tmp/secret_check.txt");
-    return "File not found";
-});
+// TEMPORARY: Allow /check-secret to bypass auth entirely
+app.MapWhen(
+    context => context.Request.Path.StartsWithSegments("/check-secret"),
+    appBuilder =>
+    {
+        appBuilder.Run(async context =>
+        {
+            var secret = context.RequestServices.GetRequiredService<IConfiguration>()["AzureAdClientSecret1"];
+            await context.Response.WriteAsync($"Len={secret?.Length ?? -1}");
+        });
+    }
+);
 //
 
 // For the microsoft login ⭐ MUST be first — fixes Scheme/Host from X-Forwarded-* headers
