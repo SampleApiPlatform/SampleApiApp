@@ -63,4 +63,24 @@ public class AuthController : ControllerBase
             return StatusCode(500, new { error = ex.Message });
         }
     }
+
+    // GET /auth/whoami  → DIAGNOSTIC: shows what is in the auth cookie
+    [HttpGet("whoami")]
+    [AllowAnonymous]
+    public async Task<IActionResult> WhoAmI()
+    {
+        var keys = new[] { "access_token", "id_token", "refresh_token" };
+        var result = new Dictionary<string, string>();
+
+        foreach (var key in keys)
+        {
+            var value = await HttpContext.GetTokenAsync(key);
+            result[key] = string.IsNullOrEmpty(value) ? "MISSING" : $"present (len={value.Length})";
+        }
+
+        result["authenticated"] = User.Identity?.IsAuthenticated == true ? "yes" : "no";
+        result["name"] = User.Identity?.Name ?? "(none)";
+
+        return Ok(result);
+    }
 }
