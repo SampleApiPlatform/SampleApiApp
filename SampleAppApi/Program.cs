@@ -37,12 +37,7 @@ builder.Configuration.AddAzureKeyVault(
     new Uri(keyVaultUri),
     new DefaultAzureCredential());
     
-//var clientSecret = builder.Configuration["AzureAdClientSecret"];
-//if (string.IsNullOrWhiteSpace(clientSecret))
-//{
-//    throw new InvalidOperationException("ClientSecret not found in Key Vault.");
-//}
-//builder.Configuration["AzureAd:ClientSecret"] = clientSecret;
+
 
 builder.Services.AddScoped<IDataAccessClient, DataAccessClientDapr>();
 
@@ -105,10 +100,18 @@ var appIdUri = builder.Configuration["AzureAd:Audience"];
 // ---------------------------------------------------------
 // 1) OIDC = Browser-Login (Redirect, Cookie-Session)
 // ---------------------------------------------------------
+
+var clientSecret = builder.Configuration["AzureAdClientSecret1"];
+if (string.IsNullOrWhiteSpace(clientSecret))
+{
+    throw new InvalidOperationException("ClientSecret not found in Key Vault.");
+}
+builder.Configuration["AzureAd:ClientSecret"] = clientSecret;
+
 builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
-    .AddMicrosoftIdentityWebApp(builder.Configuration.GetSection("AzureAd"));
-        //.EnableTokenAcquisitionToCallDownstreamApi()
-        //.AddInMemoryTokenCaches();
+    .AddMicrosoftIdentityWebApp(builder.Configuration.GetSection("AzureAd"))
+        .EnableTokenAcquisitionToCallDownstreamApi(new[] { "User.Read" })
+    .AddInMemoryTokenCaches();
 
 builder.Services.AddAuthentication()
     .AddMicrosoftIdentityWebApi(
