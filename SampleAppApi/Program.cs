@@ -123,26 +123,29 @@ builder.Configuration["AzureAd:ClientSecret"] = clientSecret;
 var verify = builder.Configuration["AzureAd:ClientSecret"];
 Console.WriteLine($"[DIAG] AzureAd:ClientSecret set: {(string.IsNullOrEmpty(verify) ? "EMPTY" : $"len={verify.Length}")}");
 //
+
+//Authetication logging into Microsoft and getting to get the JWT
 builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
     .AddMicrosoftIdentityWebApp(builder.Configuration.GetSection("AzureAd"))
     .EnableTokenAcquisitionToCallDownstreamApi(new[] { "api://f9a3d163-e6e5-481b-9ea9-869076084bc7/access_as_user" })
     .AddInMemoryTokenCaches();
 
-builder.Services.AddAuthentication()
-    .AddMicrosoftIdentityWebApi(
-        jwtBearerOptions =>
-        {
-            jwtBearerOptions.MapInboundClaims = false;
-            jwtBearerOptions.TokenValidationParameters.ValidAudiences = new[] { appIdUri, clientId };
-            jwtBearerOptions.TokenValidationParameters.ClockSkew = TimeSpan.FromMinutes(2);
-        },
-        microsoftIdentityOptions =>
-        {
-            microsoftIdentityOptions.Instance = builder.Configuration["AzureAd:Instance"] ?? "https://login.microsoftonline.com/";
-            microsoftIdentityOptions.TenantId  = builder.Configuration["AzureAd:TenantId"];
-            microsoftIdentityOptions.ClientId  = builder.Configuration["AzureAd:ClientId"];
-        },
-        JwtBearerDefaults.AuthenticationScheme);
+//JWT bearer when we already have it
+//builder.Services.AddAuthentication()
+//    .AddMicrosoftIdentityWebApi(
+//        jwtBearerOptions =>
+//        {
+//            jwtBearerOptions.MapInboundClaims = false;
+//            jwtBearerOptions.TokenValidationParameters.ValidAudiences = new[] { appIdUri, clientId };
+//            jwtBearerOptions.TokenValidationParameters.ClockSkew = TimeSpan.FromMinutes(2);
+//        },
+//        microsoftIdentityOptions =>
+//        {
+//            microsoftIdentityOptions.Instance = builder.Configuration["AzureAd:Instance"] ?? "https://login.microsoftonline.com/";
+//            microsoftIdentityOptions.TenantId  = builder.Configuration["AzureAd:TenantId"];
+//            microsoftIdentityOptions.ClientId  = builder.Configuration["AzureAd:ClientId"];
+//        },
+//        JwtBearerDefaults.AuthenticationScheme);
 
 
 
