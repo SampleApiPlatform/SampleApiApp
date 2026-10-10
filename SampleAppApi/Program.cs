@@ -10,8 +10,7 @@ using Microsoft.AspNetCore.HttpOverrides;
 
 
 var builder = WebApplication.CreateBuilder(args);
-// DEBUG EARLIEST POSSIBLE DIAG
-Console.WriteLine("=== STARTUP v3 ===");
+
 
 //This is for the redirect microsoft login
 builder.Services.Configure<ForwardedHeadersOptions>(options =>
@@ -125,7 +124,7 @@ Console.WriteLine($"[DIAG] AzureAd:ClientSecret set: {(string.IsNullOrEmpty(veri
 //
 builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
     .AddMicrosoftIdentityWebApp(builder.Configuration.GetSection("AzureAd"))
-        .EnableTokenAcquisitionToCallDownstreamApi(new[] { "User.Read" })
+    .EnableTokenAcquisitionToCallDownstreamApi(new[] { "api://f9a3d163-e6e5-481b-9ea9-869076084bc7/access_as_user" })
     .AddInMemoryTokenCaches();
 
 builder.Services.AddAuthentication()
