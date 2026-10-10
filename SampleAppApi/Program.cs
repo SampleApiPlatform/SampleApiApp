@@ -153,9 +153,9 @@ builder.Services.Configure<OpenIdConnectOptions>(
     });
 
 
-//remove cache
-//builder.Services.AddTokenAcquisition();
-//builder.Services.AddInMemoryTokenCaches();
+
+builder.Services.AddTokenAcquisition();
+builder.Services.AddInMemoryTokenCaches();
 
 //COMMENTED: JWT bearer when we already have it
 //builder.Services.AddAuthentication()
