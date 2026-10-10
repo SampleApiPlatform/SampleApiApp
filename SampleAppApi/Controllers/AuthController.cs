@@ -1,38 +1,66 @@
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-
-namespace SampleAppApi.Controllers;
+using Microsoft.Identity.Web;
 
 [ApiController]
 [Route("auth")]
 public class AuthController : ControllerBase
 {
-    private readonly IConfiguration _config;
+    private readonly ITokenAcquisition _tokenAcquisition;
+    private readonly ILogger<AuthController> _logger;
 
-    [HttpGet("whoami")]
-    [Authorize]   // kein Policy -> loest den OIDC-Redirect aus
-    public IActionResult WhoAmI()
+    public AuthController(ITokenAcquisition tokenAcquisition, ILogger<AuthController> logger)
     {
-        return Ok(User.Claims.Select(c => new { c.Type, c.Value }));
+        _tokenAcquisition = tokenAcquisition;
+        _logger = logger;
     }
 
-    public AuthController(IConfiguration config)
-    {
-        _config = config;
-    }
-
+    // GET /auth/login
+    // This triggers the Microsoft login redirect. After login, the token is stored
+    // in the user's session. The client then calls /auth/token to retrieve it.
     [HttpGet("login")]
     public IActionResult Login()
     {
-        var identityUrl = _config["ServiceUrls:IdentityApi"];
-        return Redirect($"{identityUrl}/login");
+        // Challenge the user to authenticate via Microsoft
+        return Challenge(new AuthenticationProperties
+        {
+            RedirectUri = "/auth/callback"  // after login, redirect here
+        }, OpenIdConnectDefaults.AuthenticationScheme);
     }
 
-    [HttpGet("register")]
-    public IActionResult Register()
+    // GET /auth/callback
+    // Microsoft redirects here after successful login. The cookie is now set.
+    [HttpGet("callback")]
+    public IActionResult Callback()
     {
-        var identityUrl = _config["ServiceUrls:IdentityApi"];
-        return Redirect($"{identityUrl}/register");
+        return Ok(new { message = "Login successful. Now call GET /auth/token to get your JWT." });
+    }
+
+    // GET /auth/token
+    // Returns the access token as JSON for the console client to copy.
+    [HttpGet("token")]
+    [Authorize]  // User must be logged in first
+    public async Task<IActionResult> GetToken()
+    {
+        try
+        {
+            // Request an access token for your API (same audience)
+            var accessToken = await _tokenAcquisition.GetAccessTokenForUserAsync(
+                scopes: new[] { "api://f9a3d163-e6e5-481b-9ea9-869076084bc7/access_as_user" });
+
+            return Ok(new
+            {
+                access_token = accessToken,
+                token_type = "Bearer",
+                expires_in = 3600
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to acquire token");
+            return StatusCode(500, new { error = ex.Message });
+        }
     }
 }
-
