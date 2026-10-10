@@ -6,9 +6,20 @@ using Microsoft.Identity.Web;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Identity.Web.TokenCacheProviders.InMemory;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
+using Microsoft.AspNetCore.HttpOverrides;
 
 
 var builder = WebApplication.CreateBuilder(args);
+//This is for the redirect microsoft login
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+
+    // Container Apps sits behind Envoy with dynamic internal IPs,
+    // so we must clear the known proxy/network allow-lists.
+    options.KnownNetworks.Clear();
+    options.KnownProxies.Clear();
+});
 // ---------------------------------------------------------
 // 1KeyVaultUri loaded from the Container App Secret
 // ---------------------------------------------------------
@@ -198,6 +209,9 @@ builder.Services.AddHttpClient("dapr", client =>
 }); 
 
 var app = builder.Build();
+// For the microsoft login ⭐ MUST be first — fixes Scheme/Host from X-Forwarded-* headers
+app.UseForwardedHeaders();
+
 //app.UseMiddleware<GlobalExceptionMiddleware>();
 
 if (app.Environment.IsDevelopment() || app.Environment.IsStaging())
