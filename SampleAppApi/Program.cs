@@ -241,8 +241,14 @@ app.MapWhen(
     {
         appBuilder.Run(async context =>
         {
-            var secret = context.RequestServices.GetRequiredService<IConfiguration>()["AzureAdClientSecret1"];
-            await context.Response.WriteAsync($"Len={secret?.Length ?? -1}");
+            var cfg = context.RequestServices.GetRequiredService<IConfiguration>();
+            var lines = new[]
+            {
+                $"AzureAdClientSecret1   : {(string.IsNullOrEmpty(cfg["AzureAdClientSecret1"]) ? "EMPTY" : $"len={cfg["AzureAdClientSecret1"]!.Length}")}",
+                $"AzureAd:ClientId       : {cfg["AzureAd:ClientId"] ?? "NULL"}",
+                $"AzureAd:TenantId       : {cfg["AzureAd:TenantId"] ?? "NULL"}",
+            };
+            await context.Response.WriteAsync(string.Join("\n", lines));
         });
     }
 );
