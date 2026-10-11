@@ -35,53 +35,32 @@ public class DataAccessClientDapr : IDataAccessClient
     {
         try
         {
-            //var url = "v1.0/invoke/sampledataaccessapi/method/api/movies";
-            //var result = await _httpClient.GetFromJsonAsync<ServiceResult<IEnumerable<MovieDTORead>>>(url);
-            
-            //var httpContext = _httpContextAccessor.HttpContext 
-            //                    ?? throw new InvalidOperationException("No HttpContext available");
-
-            //var token = await httpContext.GetTokenAsync("access_token")
-            //                    ?? throw new InvalidOperationException("No access_token in session");
-            
             var httpContext = _httpContextAccessor.HttpContext
-                                ?? throw new InvalidOperationException("No HttpContext available");
+                ?? throw new InvalidOperationException("No HttpContext available");
 
-            var token = await httpContext.GetTokenAsync(
-                                OpenIdConnectDefaults.AuthenticationScheme, "access_token")
-                                ?? throw new InvalidOperationException("No access_token in session");
+            var authHeader = httpContext.Request.Headers["Authorization"].FirstOrDefault();
+            if (string.IsNullOrWhiteSpace(authHeader) || !authHeader.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase))
+                throw new InvalidOperationException("No bearer token found");
 
-            //var token = await _tokenAcquisition.GetAccessTokenForUserAsync(
-            //                    new[] { "api://f9a3d163-e6e5-481b-9ea9-869076084bc7/access_as_user" });
-            
+            var token = authHeader.Substring("Bearer ".Length).Trim();
 
             using var request = new HttpRequestMessage(HttpMethod.Get,
-            "http://localhost:3500/v1.0/invoke/sampledataaccessapi/method/api/movies");
+                "v1.0/invoke/sampledataaccessapi/method/api/movies");
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
 
             var response = await _httpClient.SendAsync(request);
             response.EnsureSuccessStatusCode();
 
             var result = await response.Content.ReadFromJsonAsync<ServiceResult<IEnumerable<MovieDTORead>>>();
-            
-            
-            if(result== null)
-            {
+
+            if (result == null)
                 return ServiceResult<IEnumerable<MovieDTORead>>.Fail(["result is null"]);
-            }
-            else if (!result.Success)
-            {
+            if (!result.Success)
                 return ServiceResult<IEnumerable<MovieDTORead>>.Fail(result.Errors);
-            } 
-            else if (result.Data == null)
-            {
-                return ServiceResult<IEnumerable<MovieDTORead>>.Fail(["reuslt.Data is null"]);
-            } 
-            else
-            {
-                return ServiceResult<IEnumerable<MovieDTORead>>.Ok(result.Data);
-            }
-            
+            if (result.Data == null)
+                return ServiceResult<IEnumerable<MovieDTORead>>.Fail(["result.Data is null"]);
+
+            return ServiceResult<IEnumerable<MovieDTORead>>.Ok(result.Data);
         }
         catch (Exception ex)
         {
