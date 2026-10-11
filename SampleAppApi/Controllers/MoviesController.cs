@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SampleAppApi.Interfaces.ExternalServices;
 using NuGet.SampleSharedModels.DTO;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 
 
 namespace SampleAppApi.Controllers;
@@ -15,7 +16,7 @@ namespace SampleAppApi.Controllers;
 
 [ApiController]
 [Route("api/movies")]
-[Authorize(Policy = "AccessAsUser")]
+[Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = "AccessAsUser")]
 public class MoviesController : ControllerBase
 {
     private readonly ILogger<MoviesController> _logger;
