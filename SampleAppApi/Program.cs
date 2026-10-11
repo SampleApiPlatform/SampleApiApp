@@ -140,7 +140,7 @@ builder.Services.Configure<OpenIdConnectOptions>(
     {
         options.ResponseType = OpenIdConnectResponseType.Code;
         options.SaveTokens = true;
-        options.GetClaimsFromUserInfoEndpoint = true;
+        options.GetClaimsFromUserInfoEndpoint = false;
         options.Scope.Add("api://f9a3d163-e6e5-481b-9ea9-869076084bc7/access_as_user");
         // Surface login failures as readable text instead of a bare 500.
         options.Events.OnRemoteFailure = ctx =>
