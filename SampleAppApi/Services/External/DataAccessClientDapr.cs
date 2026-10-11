@@ -15,6 +15,11 @@ public class DataAccessClientDapr : IDataAccessClient
     private readonly string _category = string.Empty;
     private readonly IHttpContextAccessor _httpContextAccessor;
 
+    private static readonly JsonSerializerOptions JsonOptions = new()
+    {
+        PropertyNameCaseInsensitive = true
+    };
+
     public DataAccessClientDapr(IHttpClientFactory httpClientFactory,
                                 IHttpContextAccessor httpContextAccessor,
                                 ILogger<DataAccessClientDapr> logger)
@@ -87,6 +92,7 @@ public class DataAccessClientDapr : IDataAccessClient
             var response = await _httpClient.SendAsync(request);
             response.EnsureSuccessStatusCode();
 
+            
             var result = await response.Content.ReadFromJsonAsync<ServiceResult<MovieDTORead>>();
             return Validate(result);
         }
@@ -104,6 +110,7 @@ public class DataAccessClientDapr : IDataAccessClient
                 return ServiceResult<MovieDTORead>.Fail(
                     [$"Request failed with status code: {(int)response.StatusCode}"]);
 
+            
             var result = await response.Content.ReadFromJsonAsync<ServiceResult<MovieDTORead>>();
             return result == null
                 ? ServiceResult<MovieDTORead>.Fail(["Failed to deserialize the response."])
@@ -123,6 +130,7 @@ public class DataAccessClientDapr : IDataAccessClient
                 return ServiceResult<MovieDTORead>.Fail(
                     [$"Request failed with status code: {(int)response.StatusCode}"]);
 
+           
             var result = await response.Content.ReadFromJsonAsync<ServiceResult<MovieDTORead>>();
             return result == null
                 ? ServiceResult<MovieDTORead>.Fail(["Failed to deserialize the response."])
@@ -148,7 +156,7 @@ public class DataAccessClientDapr : IDataAccessClient
             if (string.IsNullOrWhiteSpace(rawBody))
                 return ServiceResult<bool>.Ok(true);   // Success with no content
 
-            var result = JsonSerializer.Deserialize<ServiceResult<bool>>(rawBody);
+            var result = JsonSerializer.Deserialize<ServiceResult<bool>>(rawBody, JsonOptions);
             return result == null
                 ? ServiceResult<bool>.Fail(["Failed to deserialize the response."])
                 : result;
