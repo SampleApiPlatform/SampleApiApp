@@ -1,3 +1,5 @@
+using System.Net.Http.Headers;
+using Microsoft.AspNetCore.Authentication;
 using NuGet.SampleSharedModels.DTO;
 using NuGet.SampleSharedModels.Results;
 using SampleAppApi.Interfaces.ExternalServices;
@@ -8,25 +10,45 @@ public class DataAccessClientDapr : IDataAccessClient
     private readonly HttpClient _httpClient;
     private readonly ILogger<DataAccessClientDapr> _logger;
     private readonly string _category = string.Empty;
-
+    private readonly IHttpContextAccessor _httpContextAccessor;
     
 
     public DataAccessClientDapr(IHttpClientFactory httpClientFactory, 
-                                    ILogger<DataAccessClientDapr> logger
+                                IHttpContextAccessor httpContextAccessor,
+                                ILogger<DataAccessClientDapr> logger
                                 )
     {
         // Dapr Sidecar HTTP Port ist IMMER 3500 in Azure Container Apps
         _httpClient = httpClientFactory.CreateClient("dapr");
         _logger = logger;
+        _httpContextAccessor = httpContextAccessor;
         _category = this.GetType().Name;
+        
     }
 
     public async Task<ServiceResult<IEnumerable<MovieDTORead>>> GetAll()
     {
         try
         {
-            var url = "v1.0/invoke/sampledataaccessapi/method/api/movies";
-            var result = await _httpClient.GetFromJsonAsync<ServiceResult<IEnumerable<MovieDTORead>>>(url);
+            //var url = "v1.0/invoke/sampledataaccessapi/method/api/movies";
+            //var result = await _httpClient.GetFromJsonAsync<ServiceResult<IEnumerable<MovieDTORead>>>(url);
+            
+            var httpContext = _httpContextAccessor.HttpContext 
+                                ?? throw new InvalidOperationException("No HttpContext available");
+
+            var token = await httpContext.GetTokenAsync("access_token")
+                                ?? throw new InvalidOperationException("No access_token in session");
+
+            using var request = new HttpRequestMessage(HttpMethod.Get,
+            "http://localhost:3500/v1.0/invoke/sampledataaccessapi/method/api/movies");
+            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", token);
+
+            var response = await _httpClient.SendAsync(request);
+            response.EnsureSuccessStatusCode();
+
+            var result = await response.Content.ReadFromJsonAsync<ServiceResult<IEnumerable<MovieDTORead>>>();
+            
+            
             if(result== null)
             {
                 return ServiceResult<IEnumerable<MovieDTORead>>.Fail(["result is null"]);

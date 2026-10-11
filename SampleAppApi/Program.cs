@@ -40,7 +40,7 @@ builder.Configuration.AddAzureKeyVault(
     new Uri(keyVaultUri),
     new DefaultAzureCredential());    
 
-
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IDataAccessClient, DataAccessClientDapr>();
 
 //Swagger
