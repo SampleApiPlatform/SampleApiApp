@@ -158,21 +158,21 @@ builder.Services.AddTokenAcquisition();
 builder.Services.AddInMemoryTokenCaches();
 
 //COMMENTED: JWT bearer when we already have it
-//builder.Services.AddAuthentication()
-//    .AddMicrosoftIdentityWebApi(
-//        jwtBearerOptions =>
-//        {
-//            jwtBearerOptions.MapInboundClaims = false;
-//            jwtBearerOptions.TokenValidationParameters.ValidAudiences = new[] { appIdUri, clientId };
-//            jwtBearerOptions.TokenValidationParameters.ClockSkew = TimeSpan.FromMinutes(2);
-//        },
-//        microsoftIdentityOptions =>
-//        {
-//            microsoftIdentityOptions.Instance = builder.Configuration["AzureAd:Instance"] ?? "https://login.microsoftonline.com/";
-//            microsoftIdentityOptions.TenantId  = builder.Configuration["AzureAd:TenantId"];
-//            microsoftIdentityOptions.ClientId  = builder.Configuration["AzureAd:ClientId"];
-//        },
-//        JwtBearerDefaults.AuthenticationScheme);
+builder.Services.AddAuthentication()
+    .AddMicrosoftIdentityWebApi(
+        jwtBearerOptions =>
+        {
+            jwtBearerOptions.MapInboundClaims = false;
+            jwtBearerOptions.TokenValidationParameters.ValidAudiences = new[] { appIdUri, clientId };
+            jwtBearerOptions.TokenValidationParameters.ClockSkew = TimeSpan.FromMinutes(2);
+        },
+        microsoftIdentityOptions =>
+        {
+            microsoftIdentityOptions.Instance = builder.Configuration["AzureAd:Instance"] ?? "https://login.microsoftonline.com/";
+            microsoftIdentityOptions.TenantId  = builder.Configuration["AzureAd:TenantId"];
+            microsoftIdentityOptions.ClientId  = builder.Configuration["AzureAd:ClientId"];
+        },
+        JwtBearerDefaults.AuthenticationScheme);
 
 
 
