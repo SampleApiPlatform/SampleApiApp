@@ -1,4 +1,6 @@
 using System.Net.Http.Headers;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Microsoft.Identity.Web;
 using NuGet.SampleSharedModels.DTO;
 using NuGet.SampleSharedModels.Results;
@@ -10,8 +12,8 @@ public class DataAccessClientDapr : IDataAccessClient
     private readonly HttpClient _httpClient;
     private readonly ILogger<DataAccessClientDapr> _logger;
     private readonly string _category = string.Empty;
-    //private readonly IHttpContextAccessor _httpContextAccessor;
-    private readonly ITokenAcquisition _tokenAcquisition;
+    private readonly IHttpContextAccessor _httpContextAccessor;
+    //private readonly ITokenAcquisition _tokenAcquisition;
     
 
     public DataAccessClientDapr(IHttpClientFactory httpClientFactory, 
@@ -23,8 +25,8 @@ public class DataAccessClientDapr : IDataAccessClient
         // Dapr Sidecar HTTP Port ist IMMER 3500 in Azure Container Apps
         _httpClient = httpClientFactory.CreateClient("dapr");
         _logger = logger;
-        //_httpContextAccessor = httpContextAccessor;
-        _tokenAcquisition = tokenAcquisition;
+        _httpContextAccessor = httpContextAccessor;
+        //_tokenAcquisition = tokenAcquisition;
         _category = this.GetType().Name;
         
     }
@@ -41,8 +43,17 @@ public class DataAccessClientDapr : IDataAccessClient
 
             //var token = await httpContext.GetTokenAsync("access_token")
             //                    ?? throw new InvalidOperationException("No access_token in session");
-            var token = await _tokenAcquisition.GetAccessTokenForUserAsync(
-                                new[] { "api://f9a3d163-e6e5-481b-9ea9-869076084bc7/access_as_user" });
+            
+            var httpContext = _httpContextAccessor.HttpContext
+                                ?? throw new InvalidOperationException("No HttpContext available");
+
+            var token = await httpContext.GetTokenAsync(
+                                OpenIdConnectDefaults.AuthenticationScheme, "access_token")
+                                ?? throw new InvalidOperationException("No access_token in session");
+
+            //var token = await _tokenAcquisition.GetAccessTokenForUserAsync(
+            //                    new[] { "api://f9a3d163-e6e5-481b-9ea9-869076084bc7/access_as_user" });
+            
 
             using var request = new HttpRequestMessage(HttpMethod.Get,
             "http://localhost:3500/v1.0/invoke/sampledataaccessapi/method/api/movies");
