@@ -114,6 +114,7 @@ public class MoviesController : ControllerBase
                 return BadRequest(serviceResult.Errors);
             }
 
-            return Ok(serviceResult.Data);
+            // DELETE should return 204 No Content on success, not 200 + data
+            return NoContent();
     }
 }

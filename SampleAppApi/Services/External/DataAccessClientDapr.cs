@@ -146,7 +146,7 @@ public class DataAccessClientDapr : IDataAccessClient
             _logger.LogInformation("Delete raw body: [{Body}] (length {Len})", rawBody, rawBody.Length);
 
             if (string.IsNullOrWhiteSpace(rawBody))
-                return ServiceResult<bool>.Ok(true);   // DELETE often returns 204 No Content
+                return ServiceResult<bool>.Ok(true);   // Success with no content
 
             var result = JsonSerializer.Deserialize<ServiceResult<bool>>(rawBody);
             return result == null
