@@ -38,13 +38,7 @@ if (string.IsNullOrWhiteSpace(keyVaultUri))
 // ---------------------------------------------------
 builder.Configuration.AddAzureKeyVault(
     new Uri(keyVaultUri),
-    new DefaultAzureCredential());
-
-//DEBUG
-var test = builder.Configuration["AzureAdClientSecret1"];
-File.WriteAllText("/tmp/secret_check.txt", $"Len={test?.Length ?? -1}");
-Console.WriteLine($"[KV] AzureAdClientSecret1 visible: {(string.IsNullOrEmpty(test) ? "NO" : $"YES (len={test.Length})")}");
-    
+    new DefaultAzureCredential());    
 
 
 builder.Services.AddScoped<IDataAccessClient, DataAccessClientDapr>();
@@ -79,31 +73,9 @@ builder.Services.AddSingleton<TokenValidationMiddleware>();
 
 // Authorization
 builder.Services.AddControllersWithViews();
-    //.AddMicrosoftIdentityUI();
-//builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
-//    .AddMicrosoftIdentityWebApp(builder.Configuration.GetSection("AzureAd"));
-//builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-//    .AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAd"));
-// 1. Authentication & JWT Bearer
+    
 var clientId = builder.Configuration["AzureAd:ClientId"];
 var appIdUri = builder.Configuration["AzureAd:Audience"];
-//var scope    = builder.Configuration["AzureAd:Scope"] ?? "access_as_user";
-
-/*builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddMicrosoftIdentityWebApi(
-        jwtBearerOptions =>
-        {
-            jwtBearerOptions.MapInboundClaims = false;
-
-            jwtBearerOptions.TokenValidationParameters.ValidAudiences = new[] { appIdUri, clientId };
-            jwtBearerOptions.TokenValidationParameters.ClockSkew = TimeSpan.FromMinutes(2);
-        },
-        microsoftIdentityOptions =>
-        {
-            microsoftIdentityOptions.Instance = builder.Configuration["AzureAd:Instance"] ?? "https://login.microsoftonline.com/";
-            microsoftIdentityOptions.TenantId = builder.Configuration["AzureAd:TenantId"];
-            microsoftIdentityOptions.ClientId = builder.Configuration["AzureAd:ClientId"];
-        });*/
 
 // ---------------------------------------------------------
 // 1) OIDC = Browser-Login (Redirect, Cookie-Session)
@@ -111,29 +83,20 @@ var appIdUri = builder.Configuration["AzureAd:Audience"];
 
 var clientSecret = builder.Configuration["AzureAdClientSecret1"];
 
-//DEBUG
-Console.WriteLine($"[DIAG] KV secret read: {(string.IsNullOrEmpty(clientSecret) ? "EMPTY" : $"len={clientSecret.Length}")}");
-//
+
 if (string.IsNullOrWhiteSpace(clientSecret))
 {
     throw new InvalidOperationException("ClientSecret not found in Key Vault.");
 }
 builder.Configuration["AzureAd:ClientSecret"] = clientSecret;
 
-//DEBUG
-var verify = builder.Configuration["AzureAd:ClientSecret"];
-Console.WriteLine($"[DIAG] AzureAd:ClientSecret set: {(string.IsNullOrEmpty(verify) ? "EMPTY" : $"len={verify.Length}")}");
-//
+
 
 //Authetication logging into Microsoft and getting to get the JWT
 builder.Configuration["AzureAd:CallbackPath"] = "/signin-oidc";
 builder.Services.AddAuthentication(OpenIdConnectDefaults.AuthenticationScheme)
     .AddMicrosoftIdentityWebApp(builder.Configuration.GetSection("AzureAd"));
-    //.EnableTokenAcquisitionToCallDownstreamApi(new[] { "api://f9a3d163-e6e5-481b-9ea9-869076084bc7/access_as_user" });
-    //.AddInMemoryTokenCaches();
-// Both of these are IServiceCollection extensions now, not chain methods.
-// Authorization code flow. Without this Identity.Web sends response_type=id_token
-// and Entra rejects it with AADSTS700054.
+
 builder.Services.Configure<OpenIdConnectOptions>(
     OpenIdConnectDefaults.AuthenticationScheme,
     options =>
@@ -157,7 +120,6 @@ builder.Services.Configure<OpenIdConnectOptions>(
 builder.Services.AddTokenAcquisition();
 builder.Services.AddInMemoryTokenCaches();
 
-//COMMENTED: JWT bearer when we already have it
 builder.Services.AddAuthentication()
     .AddMicrosoftIdentityWebApi(
         jwtBearerOptions =>
@@ -174,69 +136,6 @@ builder.Services.AddAuthentication()
         },
         JwtBearerDefaults.AuthenticationScheme);
 
-
-
-
-// 2. Authorization Policy
-/*builder.Services.AddAuthorization(options =>
-{
-    options.AddPolicy("AccessAsUser", policy =>
-        policy.RequireAssertion(ctx =>
-        {
-            var scopeClaim = ctx.User.FindFirst(c => c.Type == "scp" || c.Type == "scp2");
-            if (scopeClaim == null) return false;
-
-            var scopes = scopeClaim.Value.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-            return scopes.Contains(scope, StringComparer.OrdinalIgnoreCase);
-        }));
-});*/
-
-
-// Accept BOTH the App ID URI (v1 tokens) and the Client ID (v2 tokens).
-// This makes validation robust regardless of which token version a client requests.
-//builder.Services.Configure<JwtBearerOptions>(
-//    JwtBearerDefaults.AuthenticationScheme,
-//    options =>
-//    {
-//        var clientId = builder.Configuration["AzureAd:ClientId"];
-//        var appIdUri = builder.Configuration["AzureAd:Audience"];
-//
-//        options.TokenValidationParameters.ValidAudiences = new[]
-//        {
-//            appIdUri,   // api://f9a3d163-e6e5-481b-9ea9-869076084bc7  (v1 tokens)
-//            clientId    // f9a3d163-e6e5-481b-9ea9-869076084bc7          (v2 tokens)
-//        };
-//
-//        // Fail fast on clock skew rather than silently accepting stale tokens
-//        options.TokenValidationParameters.ClockSkew = TimeSpan.FromMinutes(2);
-//    });
-
-
-//builder.Services.AddAuthorization();
-// 3. Register the scope policy
-/*builder.Services.AddAuthorization(options =>
-{
-    options.AddPolicy("AccessAsUser", policy =>
-        policy.RequireAssertion(ctx =>
-        {
-            // Debug: Print all claims to the console
-            if (ctx.User.Identity?.IsAuthenticated == true)
-            {
-                var claims = string.Join(", ", ctx.User.Claims.Select(c => $"{c.Type}: '{c.Value}'"));
-                //Console.WriteLine($"DEBUG CLAIMS: {claims}");
-                
-                var scp = ctx.User.FindFirst("scp")?.Value;
-                //Console.WriteLine($"DEBUG scp: '{scp}'");
-            }
-
-            var scopeClaim = ctx.User.FindFirst(c => c.Type == "scp" || c.Type == "scp2");
-            
-            if (scopeClaim == null) return false;
-
-            var scopes = scopeClaim.Value.Split(' ', StringSplitOptions.RemoveEmptyEntries);
-            return scopes.Contains("access_as_user", StringComparer.OrdinalIgnoreCase);
-        }));
-});*/
 var scope = builder.Configuration["AzureAd:Scope"] ?? "access_as_user";
 
 builder.Services.AddAuthorization(options =>
@@ -262,30 +161,6 @@ builder.Services.AddHttpClient("dapr", client =>
 }); 
 
 var app = builder.Build();
-
-//DEBUG
-// TEMPORARY: Allow /check-secret to bypass auth entirely
-app.MapWhen(
-    context => context.Request.Path.StartsWithSegments("/check-secret"),
-    appBuilder =>
-    {
-        appBuilder.Run(async context =>
-        {
-            var cfg = context.RequestServices.GetRequiredService<IConfiguration>();
-            var lines = new[]
-            {
-                $"AzureAdClientSecret1   : {(string.IsNullOrEmpty(cfg["AzureAdClientSecret1"]) ? "EMPTY" : $"len={cfg["AzureAdClientSecret1"]!.Length}")}",
-                $"AzureAd:ClientSecret   : {(string.IsNullOrEmpty(cfg["AzureAd:ClientSecret"]) ? "EMPTY" : $"len={cfg["AzureAd:ClientSecret"]!.Length}")}",
-                $"AzureAd:ClientId       : {cfg["AzureAd:ClientId"] ?? "NULL"}",
-                $"AzureAd:TenantId       : {cfg["AzureAd:TenantId"] ?? "NULL"}",
-                $"AzureAd:Instance       : {cfg["AzureAd:Instance"] ?? "NULL"}",
-                $"AzureAd:CallbackPath   : {cfg["AzureAd:CallbackPath"] ?? "NULL"}",
-            };
-            await context.Response.WriteAsync(string.Join("\n", lines));
-        });
-    }
-);
-//
 
 // For the microsoft login ⭐ MUST be first — fixes Scheme/Host from X-Forwarded-* headers
 app.UseForwardedHeaders();
