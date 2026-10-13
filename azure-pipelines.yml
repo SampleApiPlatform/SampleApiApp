@@ -93,5 +93,5 @@ steps:
     inlineScript: |
       az containerapp update \
         --name sampleappapi \
-        --resource-group SampleAppApi_rg \
+        --resource-group sampleApiPlatform_rg \
         --image docker.io/$(DOCKERHUB_USERNAME)/sampleappapi:latest
