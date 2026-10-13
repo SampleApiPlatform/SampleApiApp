@@ -86,8 +86,8 @@ steps:
 - task: AzureCLI@2
   displayName: Update ACA image
   inputs:
-    #we reuse the same service connection as in SampleDataAccessApi because it is only to login into Azure
-    azureSubscription: 'SampleAppApi_ServiceConnection'
+    #Service connections are meant to login into Azure and run the script.
+    azureSubscription: 'SampleApiPlatform_ServiceConnection'
     scriptType: bash
     scriptLocation: inlineScript
     inlineScript: |
