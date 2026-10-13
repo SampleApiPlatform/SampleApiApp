@@ -81,7 +81,7 @@ steps:
   displayName: Push Docker image
 
 # ---------------------------------------------------------
-# Update ACA image
+# Update ACA image.
 # ---------------------------------------------------------
 - task: AzureCLI@2
   displayName: Update ACA image
