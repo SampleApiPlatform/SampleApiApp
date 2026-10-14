@@ -94,7 +94,11 @@ builder.Services.AddAuthorization(options =>
         }));
 });
 //
-
+builder.Services.AddHttpClient("dapr", client =>
+{
+    client.BaseAddress = new Uri("http://localhost:3500/");
+    client.DefaultRequestHeaders.Add("Dapr-TimeoutInSeconds", "30");
+}); 
 
 var app = builder.Build();
 
