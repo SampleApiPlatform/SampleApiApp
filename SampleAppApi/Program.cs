@@ -3,13 +3,14 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using SampleAppApi.Extensions;
+using SampleAppApi.Interfaces.ExternalServices;
 
 
 
 
 var builder = WebApplication.CreateBuilder(args);
 
-
+builder.Services.AddScoped<IDataAccessClient, DataAccessClientDapr>();
 
 // Register services
 //builder.Services.AddScoped<IMovieRepository, MovieRepository>();
@@ -69,7 +70,8 @@ var scope    = builder.Configuration["AzureAd:Scope"] ?? "access_as_user";
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
-        options.Authority = $"https://login.microsoftonline.com/{tenantId}/v2.0";
+        //options.Authority = $"https://login.microsoftonline.com/{tenantId}/v2.0";
+        options.Authority = $"https://login.microsoftonline.com/{tenantId}";
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateAudience = true,
