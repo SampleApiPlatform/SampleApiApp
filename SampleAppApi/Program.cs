@@ -70,8 +70,7 @@ var scope    = builder.Configuration["AzureAd:Scope"] ?? "access_as_user";
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
     {
-        //options.Authority = $"https://login.microsoftonline.com/{tenantId}/v2.0";
-        options.Authority = $"https://login.microsoftonline.com/{tenantId}";
+        options.Authority = $"https://login.microsoftonline.com/{tenantId}/v2.0";
         options.TokenValidationParameters = new TokenValidationParameters
         {
             ValidateAudience = true,
