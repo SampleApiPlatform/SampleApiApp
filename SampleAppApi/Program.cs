@@ -94,6 +94,11 @@ builder.Services.AddAuthorization(options =>
         }));
 });
 //
+//builder.Configuration.AddAzureKeyVault(
+//    new Uri(keyVaultUri),
+//    new DefaultAzureCredential());    
+
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddHttpClient("dapr", client =>
 {
     client.BaseAddress = new Uri("http://localhost:3500/");
