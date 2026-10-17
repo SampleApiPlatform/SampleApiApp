@@ -1,6 +1,6 @@
 //NEW
+using Azure.Identity;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using SampleAppApi.Extensions;
 using SampleAppApi.Interfaces.ExternalServices;
@@ -23,6 +23,7 @@ var tenantId = builder.Configuration["AzureAd:TenantId"];
 var scope    = builder.Configuration["AzureAd:Scope"] ?? "access_as_user";
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    //.AddMicrosoftIdentityWebApi(builder.Configuration.GetSection("AzureAd"));
     .AddJwtBearer(options =>
     {
         options.Authority = $"https://login.microsoftonline.com/{tenantId}/v2.0";
