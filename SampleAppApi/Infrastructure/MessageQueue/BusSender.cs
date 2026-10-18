@@ -22,9 +22,11 @@ public class BusSender: IBusSender
         _sender = sender; // this is the singleton that we have defined in Program.cs
         _logger = logger;
     }
-    public async Task SendAsync<T>(Guid messageId, string recordId , MessageAction action, T data)
+    public async Task SendAsync<T>(Guid messageId, string recordId , MessageAction action, T? data)
     {
         //_logger.LogInformation("Sending message to Queue: {Queue}, Namespace: {Namespace}", 
+        //                        _sender.EntityPath, _sender.FullyQualifiedNamespace);
+        _logger.LogInformation("Sending message to Queue. recordId: {recordId}", recordId);
         //                        _sender.EntityPath, _sender.FullyQualifiedNamespace);
         var payload = new BusPayload<T>
         {
@@ -62,12 +64,12 @@ public class BusSender: IBusSender
 //TODO: this code needs to move somewhere else
 public interface IBusSender
 {
-    Task SendAsync<T>(Guid messageId, string recordId , MessageAction action, T data);
+    Task SendAsync<T>(Guid messageId, string recordId , MessageAction action, T? data);
 }
 public enum MessageAction {Add, Update, Delete, None};
 public record BusPayload<T>
 {
     public required MessageAction Action { get; init; }
-    public string? RecordId; // id for the record to update or for a delete. For an add id=0
+    public string? RecordId { get; set; } // id for the record to update or for a delete. For an add id=0
     public T? Data { get; init; } // for a delete this is null
 }
