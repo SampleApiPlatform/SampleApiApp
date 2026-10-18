@@ -1,5 +1,6 @@
 //NEW
 using Azure.Identity;
+using Azure.Messaging.ServiceBus;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using SampleAppApi.Extensions;
@@ -7,7 +8,23 @@ using SampleAppApi.Interfaces.ExternalServices;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddScoped<IDataAccessClient, DataAccessClientDapr>();
+builder.Services.AddKeyedScoped<IDataAccessClient, DataAccessClientDapr>("dapr");
+builder.Services.AddKeyedScoped<IDataAccessClient, DataAccessClientBus>("bus");
+builder.Services.AddScoped<IBusSender, BusSender>();
+
+// 
+builder.Services.AddSingleton(sp =>
+{
+    // reading values from appsettings.json
+    var cfg = sp.GetRequiredService<IConfiguration>();
+    var ns  = cfg["ServiceBus:FullyQualifiedNamespace"]
+              ?? throw new InvalidOperationException("ServiceBus:FullyQualifiedNamespace missing");
+    var q   = cfg["ServiceBus:QueueName"]
+              ?? throw new InvalidOperationException("ServiceBus:QueueName missing");
+
+    var client = new ServiceBusClient(ns, new DefaultAzureCredential());
+    return client.CreateSender(q);      // disposed when the application shuts down
+});
 
 //Swagger
 builder.Services.AddSwaggerDocumentation();
