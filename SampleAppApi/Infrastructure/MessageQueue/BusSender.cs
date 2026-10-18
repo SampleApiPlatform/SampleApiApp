@@ -22,11 +22,16 @@ public class BusSender: IBusSender
             Data = data
         };
 
+        var id = GetIdString(data);
+            if (string.IsNullOrWhiteSpace(id))
+                throw new ArgumentException("Payload must have a non-empty Id.", nameof(data));
+
         var msg = new ServiceBusMessage(JsonSerializer.SerializeToUtf8Bytes(payload))
         {
             Subject       = action.ToString(),          // real Label -> Consumer-Dispatch & SQL-Filter
             ContentType   = "application/json",         // real Header
-            MessageId     = GetId(data)?.ToString(),    // Duplicate Detection
+            //MessageId     = GetId(data)?.ToString(),    // Duplicate Detection
+            MessageId     = id,
             PartitionKey  = partitionKey,
             TimeToLive    = TimeSpan.FromDays(7)
         };
@@ -37,6 +42,9 @@ public class BusSender: IBusSender
     private static Guid? GetId<T>(T data) =>
         data is null ? null
         : (data.GetType().GetProperty("Id")?.GetValue(data) as Guid?);
+    private static string? GetIdString<T>(T data) =>
+        data is null ? null
+            : (data.GetType().GetProperty("Id")?.GetValue(data)?.ToString());
 }
 
 //TODO: this code needs to move somewhere else
