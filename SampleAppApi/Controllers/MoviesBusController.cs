@@ -5,6 +5,7 @@ using NuGet.SampleSharedModels.DTO;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Google.Api;
 using Microsoft.Azure.Amqp.Framing;
+using System.Runtime.CompilerServices;
 
 
 namespace SampleAppApi.Controllers;
@@ -76,46 +77,41 @@ public class MoviesBusController : ControllerBase
 
     //[Authorize]
     [HttpPost]
-    public async Task<IActionResult> Add(MovieDTORead movieDTORead, CancellationToken ct)
+    public async Task<IActionResult> Add(MovieDTOAdd movieDTOAdd)
     {
-        if (movieDTORead.Id == null)
-        {
-            movieDTORead.Id = Guid.NewGuid().ToString(); // necessary to detect duplicate records in the queue
-        }
-        await _busSender.SendAsync(MessageAction.Add, movieDTORead, null, ct);
-        return Accepted(movieDTORead.Id);
+        //if (movieDTORead.Id == null)
+        //{
+        //    movieDTORead.Id = Guid.NewGuid().ToString(); // necessary to detect duplicate records in the queue
+        //}
+        var messageId = Guid.NewGuid(); // this nis the reference for the table
+        //TODO: insert in the database a record with reuestId=messageId, status=peding
+        await _busSender.SendAsync(messageId, string.Empty, MessageAction.Add, movieDTOAdd);
+        return Accepted(messageId);
     }
 
     //[Authorize]
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(string id, MovieDTOUpdate movieDTOUpdate)
     {
-            var serviceResult = await _dataAccessClient.Update(id, movieDTOUpdate);
-
-            if (!serviceResult.Success)
-            {
-                var errorText = string.Join(";", serviceResult.Errors);
-                _logger.LogError($"MovieController.Update Failed: {errorText}");    
-                return BadRequest(serviceResult.Errors);
-            }
-
-            return Ok(serviceResult.Data);
+        var messageId = Guid.NewGuid(); // this nis the reference for the table
+        //TODO: insert in the database a record with reuestId=messageId, status=peding
+        await _busSender.SendAsync(messageId, string.Empty, MessageAction.Update, movieDTOUpdate);
+        return Accepted(messageId);   
     }
 
     //[Authorize]
     [HttpDelete("{id}")]
     public async Task<IActionResult> Delete(string id)
     {
-            var serviceResult = await _dataAccessClient.Delete(id);
-
-            if (!serviceResult.Success)
-            {
-                var errorText = string.Join(";", serviceResult.Errors);
-                _logger.LogError($"MovieController.Delete Failed: {errorText}");
-                return BadRequest(serviceResult.Errors);
-            }
-
-            // DELETE should return 204 No Content on success, not 200 + data
-            return NoContent();
+        var messageId = Guid.NewGuid(); // this nis the reference for the table
+        //TODO: insert in the database a record with reuestId=messageId, status=peding
+        var dummyData = new MovieDTORead()
+        {
+            Id= Guid.Empty.ToString(),
+            Title = String.Empty,
+            Year = 0
+        };
+        await _busSender.SendAsync(messageId, string.Empty, MessageAction.Delete, dummyData);
+        return Accepted(messageId); 
     }
 }
