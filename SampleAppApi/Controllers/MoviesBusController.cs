@@ -95,7 +95,7 @@ public class MoviesBusController : ControllerBase
     {
         var messageId = Guid.NewGuid(); // this nis the reference for the table
         //TODO: insert in the database a record with reuestId=messageId, status=peding
-        await _busSender.SendAsync(messageId, string.Empty, MessageAction.Update, movieDTOUpdate);
+        await _busSender.SendAsync(messageId, id, MessageAction.Update, movieDTOUpdate);
         return Accepted(messageId);   
     }
 
@@ -111,7 +111,7 @@ public class MoviesBusController : ControllerBase
             Title = String.Empty,
             Year = 0
         };
-        await _busSender.SendAsync(messageId, string.Empty, MessageAction.Delete, dummyData);
+        await _busSender.SendAsync(messageId, id, MessageAction.Delete, dummyData);
         return Accepted(messageId); 
     }
 }
