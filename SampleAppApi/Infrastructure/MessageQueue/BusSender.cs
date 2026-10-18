@@ -8,13 +8,17 @@ public class BusSender: IBusSender
 {
         // 1. Feld deklarieren
     private readonly ServiceBusSender _sender;
+    private readonly ILogger<BusSender> _logger;
 
-    public BusSender(ServiceBusSender sender)
+    public BusSender(ServiceBusSender sender, ILogger<BusSender> logger)
     {
         _sender = sender; // this is the singleton that we have defined in Program.cs
+        _logger = logger;
     }
     public async Task SendAsync<T>(MessageAction action, T data, string? partitionKey = null, CancellationToken ct = default)
     {
+        _logger.LogInformation("Sending message to Queue: {Queue}, Namespace: {Namespace}", 
+                                _sender.EntityPath, _sender.FullyQualifiedNamespace);
         var payload = new BusPayload<T>
         {
             Action = action,
