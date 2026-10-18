@@ -17,7 +17,7 @@ namespace SampleAppApi.Controllers;
 //If your method returns a Task directly, it must NOT be async
 
 [ApiController]
-[Route("api/movies")]
+[Route("api/bus/movies")]
 [Authorize(AuthenticationSchemes = JwtBearerDefaults.AuthenticationScheme, Policy = "AccessAsUser")]
 public class MoviesBusController : ControllerBase
 {
