@@ -22,16 +22,14 @@ public class BusSender: IBusSender
         _sender = sender; // this is the singleton that we have defined in Program.cs
         _logger = logger;
     }
-    public async Task SendAsync<T>(Guid messageId, string recordId , MessageAction action, T? data)
+    public async Task SendAsync<T>(Guid messageId, MessageAction action, T? data)
     {
         //_logger.LogInformation("Sending message to Queue: {Queue}, Namespace: {Namespace}", 
         //                        _sender.EntityPath, _sender.FullyQualifiedNamespace);
-        _logger.LogInformation("Sending message to Queue. recordId: {recordId}", recordId);
         //                        _sender.EntityPath, _sender.FullyQualifiedNamespace);
         var payload = new BusPayload<T>
         {
             Action = action,
-            RecordId = recordId,
             Data = data
         };
 
@@ -52,24 +50,16 @@ public class BusSender: IBusSender
 
         await _sender.SendMessageAsync(msg);
     }
-
-    private static Guid? GetId<T>(T data) =>
-        data is null ? null
-        : (data.GetType().GetProperty("Id")?.GetValue(data) as Guid?);
-    private static string? GetIdString<T>(T data) =>
-        data is null ? null
-            : (data.GetType().GetProperty("Id")?.GetValue(data)?.ToString());
 }
 
 //TODO: this code needs to move somewhere else
 public interface IBusSender
 {
-    Task SendAsync<T>(Guid messageId, string recordId , MessageAction action, T? data);
+    Task SendAsync<T>(Guid messageId, MessageAction action, T? data);
 }
 public enum MessageAction {Add, Update, Delete, None};
 public record BusPayload<T>
 {
     public required MessageAction Action { get; init; }
-    public string? RecordId { get; set; } // id for the record to update or for a delete. For an add id=0
     public T? Data { get; init; } // for a delete this is null
 }

@@ -86,7 +86,13 @@ public class MoviesBusController : ControllerBase
         var messageId = Guid.NewGuid(); // this nis the reference for the table
         //TODO: insert in the database a record with reuestId=messageId, status=peding
         //
-        await _busSender.SendAsync(messageId, string.Empty, MessageAction.Add, movieDTOAdd);
+        var movieDTORead = new MovieDTORead()
+        {
+            Id = String.Empty,
+            Title = movieDTOAdd.Title,
+            Year = movieDTOAdd.Year
+        };
+        await _busSender.SendAsync(messageId, MessageAction.Add, movieDTORead);
         return Accepted(messageId);
     }
 
@@ -96,7 +102,13 @@ public class MoviesBusController : ControllerBase
     {
         var messageId = Guid.NewGuid(); // this nis the reference for the table
         //TODO: insert in the database a record with reuestId=messageId, status=peding
-        await _busSender.SendAsync(messageId, id, MessageAction.Update, movieDTOUpdate);
+        var movieDTORead = new MovieDTORead()
+        {
+            Id = id,
+            Title = movieDTOUpdate.Title,
+            Year = movieDTOUpdate.Year
+        };
+        await _busSender.SendAsync(messageId, MessageAction.Update, movieDTORead);
         return Accepted(messageId);   
     }
 
@@ -106,13 +118,13 @@ public class MoviesBusController : ControllerBase
     {
         var messageId = Guid.NewGuid(); // this nis the reference for the table
         //TODO: insert in the database a record with reuestId=messageId, status=peding
-        var dummyData = new MovieDTORead()
+        var movieDTORead = new MovieDTORead()
         {
-            Id= Guid.Empty.ToString(),
+            Id= id,
             Title = String.Empty,
             Year = 0
         };
-        await _busSender.SendAsync(messageId, id, MessageAction.Delete, dummyData);
+        await _busSender.SendAsync(messageId, MessageAction.Delete, movieDTORead);
         return Accepted(messageId); 
     }
 }
