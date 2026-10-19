@@ -85,6 +85,7 @@ public class MoviesBusController : ControllerBase
         //}
         var messageId = Guid.NewGuid(); // this nis the reference for the table
         //TODO: insert in the database a record with reuestId=messageId, status=peding
+        //
         await _busSender.SendAsync(messageId, string.Empty, MessageAction.Add, movieDTOAdd);
         return Accepted(messageId);
     }

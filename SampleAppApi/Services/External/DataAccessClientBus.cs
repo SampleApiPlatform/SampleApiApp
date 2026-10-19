@@ -8,7 +8,7 @@ using SampleAppApi.Interfaces.ExternalServices;
 
 public class DataAccessClientBus : IDataAccessClient
 {
-    private const string Base = "v1.0/invoke/sampledataaccessapi/method/api/movies";
+    private const string Base = "v1.0/invoke/sampledataaccessapi/method/api/bus/movies";
 
     private readonly HttpClient _httpClient;
     private readonly ILogger<DataAccessClientDapr> _logger;
