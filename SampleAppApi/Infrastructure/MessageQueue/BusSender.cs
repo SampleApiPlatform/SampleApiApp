@@ -60,6 +60,6 @@ public interface IBusSender
 public enum MessageAction {Add, Update, Delete, None};
 public record BusPayload<T>
 {
-    public required MessageAction Action { get; init; }
-    public T? Data { get; init; } // for a delete this is null
+    public MessageAction Action { get; init; } = MessageAction.None;
+    public T? Data { get; init; } // Data is always required. Always will be there
 }
