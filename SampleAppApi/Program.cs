@@ -3,6 +3,7 @@ using Azure.Identity;
 using Azure.Messaging.ServiceBus;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using NuGet.SampleSharedModels.Interfaces.ServiceBus;
 using SampleAppApi.Extensions;
 using SampleAppApi.Interfaces.ExternalServices;
 

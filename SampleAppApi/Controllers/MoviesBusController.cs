@@ -3,9 +3,8 @@ using Microsoft.AspNetCore.Mvc;
 using SampleAppApi.Interfaces.ExternalServices;
 using NuGet.SampleSharedModels.DTO;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Google.Api;
-using Microsoft.Azure.Amqp.Framing;
-using System.Runtime.CompilerServices;
+using NuGet.SampleSharedModels.Interfaces;
+using NuGet.SampleSharedModels.Interfaces.ServiceBus;
 
 
 namespace SampleAppApi.Controllers;

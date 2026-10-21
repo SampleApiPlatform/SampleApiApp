@@ -2,6 +2,9 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using Azure.Identity;
 using Azure.Messaging.ServiceBus;
+using NuGet.SampleSharedModels.DTO.ServiceBus;
+using NuGet.SampleSharedModels.Interfaces.ServiceBus;
+
 
 
 
@@ -27,7 +30,7 @@ public class BusSender: IBusSender
         //_logger.LogInformation("Sending message to Queue: {Queue}, Namespace: {Namespace}", 
         //                        _sender.EntityPath, _sender.FullyQualifiedNamespace);
         //                        _sender.EntityPath, _sender.FullyQualifiedNamespace);
-        var payload = new BusPayload<T>
+        var payload = new BusPayloadDTO<T>
         {
             Action = action,
             Data = data
@@ -52,14 +55,5 @@ public class BusSender: IBusSender
     }
 }
 
-//TODO: this code needs to move somewhere else
-public interface IBusSender
-{
-    Task SendAsync<T>(Guid messageId, MessageAction action, T? data);
-}
-public enum MessageAction {Add, Update, Delete, None};
-public record BusPayload<T>
-{
-    public MessageAction Action { get; init; } = MessageAction.None;
-    public T? Data { get; init; } // Data is always required. Always will be there
-}
+
+
