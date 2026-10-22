@@ -6,13 +6,14 @@ using Microsoft.IdentityModel.Tokens;
 using NuGet.SampleSharedModels.Interfaces.ServiceBus;
 using SampleAppApi.Extensions;
 using SampleAppApi.Interfaces.ExternalServices;
+using SampleAppApi.Services.External;
 
 var builder = WebApplication.CreateBuilder(args);
 
 //builder.Services.AddKeyedScoped<IDataAccessClient, DataAccessClientDapr>("dapr");
 //builder.Services.AddKeyedScoped<IDataAccessClient, DataAccessClientBus>("bus");
-builder.Services.AddScoped<IDataAccessClient, IDataAccessClient>();
-builder.Services.AddScoped<IDataAccessBusClient, IDataAccessBusClient>();
+builder.Services.AddScoped<IDataAccessClient, DataAccessClientDapr>();
+builder.Services.AddScoped<IDataAccessBusClient, DataAccessClientBus>();
 builder.Services.AddScoped<IBusSender, BusSender>();
 
 // 

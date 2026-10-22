@@ -5,7 +5,7 @@ using NuGet.SampleSharedModels.DTO;
 using NuGet.SampleSharedModels.Results;
 using SampleAppApi.Interfaces.ExternalServices;
 
-
+namespace SampleAppApi.Services.External;
 public class DataAccessClientDapr : IDataAccessClient
 {
     private const string Base = "v1.0/invoke/sampledataaccessapi/method/api/movies";

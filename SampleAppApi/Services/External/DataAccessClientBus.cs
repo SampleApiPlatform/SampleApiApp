@@ -5,7 +5,7 @@ using NuGet.SampleSharedModels.DTO;
 using NuGet.SampleSharedModels.Interfaces.ServiceBus;
 using NuGet.SampleSharedModels.Results;
 
-
+namespace SampleAppApi.Services.External;
 public class DataAccessClientBus : IDataAccessBusClient
 {
     private const string Base = "v1.0/invoke/sampledataaccessapi/method/api/bus/movies";
