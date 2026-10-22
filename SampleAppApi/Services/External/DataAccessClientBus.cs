@@ -2,11 +2,11 @@ using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using NuGet.SampleSharedModels.DTO;
+using NuGet.SampleSharedModels.Interfaces.ServiceBus;
 using NuGet.SampleSharedModels.Results;
-using SampleAppApi.Interfaces.ExternalServices;
 
 
-public class DataAccessClientBus : IDataAccessClient
+public class DataAccessClientBus : IDataAccessBusClient
 {
     private const string Base = "v1.0/invoke/sampledataaccessapi/method/api/bus/movies";
 
@@ -99,24 +99,32 @@ public class DataAccessClientBus : IDataAccessClient
         catch (Exception ex) { return Fail<MovieDTORead>(nameof(GetById), ex); }
     }
 
-    public async Task<ServiceResult<MovieDTORead>> Add(MovieDTOAdd movieDTOAdd)
+    public async Task<ServiceResult<BusRequest<MovieDTORead>>> Add(BusRequest<MovieDTORead> busRequest)
     {
-        throw new NotSupportedException (
-            "This method is not supported for this implementation"
-        );
+        try
+        {
+            using var request = BuildRequest(HttpMethod.Post, $"{Base}", busRequest);
+            var response = await _httpClient.SendAsync(request);
+            response.EnsureSuccessStatusCode();
+
+                
+            var result = await response.Content.ReadFromJsonAsync<ServiceResult<BusRequest<MovieDTORead>>>();
+            return Validate(result);
+        }
+        catch (Exception ex) { 
+            return Fail<BusRequest<MovieDTORead>>(nameof(GetById), ex); 
+        }
     }
 
     public async Task<ServiceResult<MovieDTORead>> Update(string id, MovieDTOUpdate movieDTOUpdate)
     {
-        throw new NotSupportedException (
-            "This method is not supported for this implementation"
-        );
+        throw new NotImplementedException("Methos not implemented");
+
     }
 
     public async Task<ServiceResult<bool>> Delete(string id)
     {
-        throw new NotSupportedException (
-            "This method is not supported for this implementation"
-        );
+        throw new NotImplementedException("Methos not implemented");
     }
+
 }

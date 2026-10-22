@@ -161,6 +161,9 @@ public class DataAccessClientDapr : IDataAccessClient
                 ? ServiceResult<bool>.Fail(["Failed to deserialize the response."])
                 : result;
         }
-        catch (Exception ex) { return Fail<bool>(nameof(Delete), ex); }
+        catch (Exception ex) 
+        { 
+            return Fail<bool>(nameof(Delete), ex); 
+        }
     }
 }

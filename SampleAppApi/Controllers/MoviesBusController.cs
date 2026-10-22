@@ -5,6 +5,8 @@ using NuGet.SampleSharedModels.DTO;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using NuGet.SampleSharedModels.Interfaces;
 using NuGet.SampleSharedModels.Interfaces.ServiceBus;
+using Azure.Core;
+using NuGet.SampleSharedModels.DTO.ServiceBus;
 
 
 namespace SampleAppApi.Controllers;
@@ -22,53 +24,52 @@ namespace SampleAppApi.Controllers;
 public class MoviesBusController : ControllerBase
 {
     private readonly ILogger<MoviesController> _logger;
-    private readonly IDataAccessClient _dataAccessClient;
+    private readonly IDataAccessBusClient _dataAccessBusClient;
     private readonly IBusSender _busSender;
 
     private readonly string controllerName = string.Empty;
     public MoviesBusController(
         ILogger<MoviesController> logger,
         IBusSender busSender,
-        [FromKeyedServices("bus")] IDataAccessClient dataAccessClient)
+        //[FromKeyedServices("bus")] IDataAccessClient dataAccessClient,
+        IDataAccessBusClient dataAccessBusClient)
     {
         _logger = logger;
         _busSender = busSender;
-        _dataAccessClient = dataAccessClient;
+        _dataAccessBusClient = dataAccessBusClient;
         controllerName = GetType().Name;
     }
 
     [HttpGet]
     public async Task<ActionResult<IEnumerable<MovieDTORead>>> GetAll()
     {
-        //try
-        //{
-            var serviceResult = await _dataAccessClient.GetAll();
+        var serviceResult = await _dataAccessBusClient.GetAll();
 
-            if (!serviceResult.Success)
-            {
-                var errorText = string.Join(";", serviceResult.Errors);
-                _logger.LogError($"MovieController.GetAll Failed: {errorText}");    
+        if (!serviceResult.Success)
+        {
+            var errorText = string.Join(";", serviceResult.Errors);
+            _logger.LogError($"MovieController.GetAll Failed: {errorText}");    
 
-                return BadRequest(serviceResult.Errors);
-            }
+            return BadRequest(serviceResult.Errors);
+        }
 
-            return Ok(serviceResult.Data);
+        return Ok(serviceResult.Data);
     }
 
     [HttpGet("{id}")]
     public async Task<ActionResult<MovieDTORead>> GetById(string id)
     {
-            var serviceResult = await _dataAccessClient.GetById(id);
+        var serviceResult = await _dataAccessBusClient.GetById(id);
 
-            if (!serviceResult.Success)
-            {
-                var errorText = string.Join(";", serviceResult.Errors);
-                _logger.LogError($"MovieController.GetById Failed: {errorText}");  
+        if (!serviceResult.Success)
+        {
+            var errorText = string.Join(";", serviceResult.Errors);
+            _logger.LogError($"MovieController.GetById Failed: {errorText}");  
 
-                return BadRequest(serviceResult.Errors);
-            }
+            return BadRequest(serviceResult.Errors);
+        }
 
-            return Ok(serviceResult.Data);
+        return Ok(serviceResult.Data);
     }
 
 
@@ -78,52 +79,31 @@ public class MoviesBusController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Add(MovieDTOAdd movieDTOAdd)
     {
-        //if (movieDTORead.Id == null)
-        //{
-        //    movieDTORead.Id = Guid.NewGuid().ToString(); // necessary to detect duplicate records in the queue
-        //}
-        var messageId = Guid.NewGuid(); // this nis the reference for the table
-        //TODO: insert in the database a record with reuestId=messageId, status=peding
-        //
         var movieDTORead = new MovieDTORead()
+            {
+                Id = String.Empty,
+                Title = movieDTOAdd.Title,
+                Year = movieDTOAdd.Year
+            };
+
+            var busRequest = new BusRequest<MovieDTORead>()
+            {
+                IsSucceeded = null,
+                MessageId = Guid.NewGuid(),
+                Action = MessageAction.Add,
+                Data = movieDTORead   
+            };
+        var serviceResult = await _dataAccessBusClient.Add(busRequest);
+
+        if (!serviceResult.Success)
         {
-            Id = String.Empty,
-            Title = movieDTOAdd.Title,
-            Year = movieDTOAdd.Year
-        };
-        await _busSender.SendAsync(messageId, MessageAction.Add, movieDTORead);
-        return Accepted(messageId);
+            var errorText = string.Join(";", serviceResult.Errors);
+            _logger.LogError($"MovieController.Add Failed: {errorText}");  
+
+            return BadRequest(serviceResult.Errors);
+        }
+        return Ok(serviceResult.Data);
     }
 
-    //[Authorize]
-    [HttpPut("{id}")]
-    public async Task<IActionResult> Update(string id, MovieDTOUpdate movieDTOUpdate)
-    {
-        var messageId = Guid.NewGuid(); // this nis the reference for the table
-        //TODO: insert in the database a record with reuestId=messageId, status=peding
-        var movieDTORead = new MovieDTORead()
-        {
-            Id = id,
-            Title = movieDTOUpdate.Title,
-            Year = movieDTOUpdate.Year
-        };
-        await _busSender.SendAsync(messageId, MessageAction.Update, movieDTORead);
-        return Accepted(messageId);   
-    }
-
-    //[Authorize]
-    [HttpDelete("{id}")]
-    public async Task<IActionResult> Delete(string id)
-    {
-        var messageId = Guid.NewGuid(); // this nis the reference for the table
-        //TODO: insert in the database a record with reuestId=messageId, status=peding
-        var movieDTORead = new MovieDTORead()
-        {
-            Id= id,
-            Title = String.Empty,
-            Year = 0
-        };
-        await _busSender.SendAsync(messageId, MessageAction.Delete, movieDTORead);
-        return Accepted(messageId); 
-    }
+    
 }

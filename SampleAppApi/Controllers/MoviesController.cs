@@ -25,7 +25,8 @@ public class MoviesController : ControllerBase
     private readonly string controllerName = string.Empty;
     public MoviesController(
         ILogger<MoviesController> logger,
-        [FromKeyedServices("dapr")] IDataAccessClient dataAccessClient)
+        //[FromKeyedServices("dapr")] IDataAccessClient dataAccessClient
+        IDataAccessClient dataAccessClient)
     {
         _logger = logger;
         _dataAccessClient = dataAccessClient;
@@ -89,6 +90,7 @@ public class MoviesController : ControllerBase
     [HttpPut("{id}")]
     public async Task<IActionResult> Update(string id, MovieDTOUpdate movieDTOUpdate)
     {
+        
             var serviceResult = await _dataAccessClient.Update(id, movieDTOUpdate);
 
             if (!serviceResult.Success)

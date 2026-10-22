@@ -9,8 +9,10 @@ using SampleAppApi.Interfaces.ExternalServices;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddKeyedScoped<IDataAccessClient, DataAccessClientDapr>("dapr");
-builder.Services.AddKeyedScoped<IDataAccessClient, DataAccessClientBus>("bus");
+//builder.Services.AddKeyedScoped<IDataAccessClient, DataAccessClientDapr>("dapr");
+//builder.Services.AddKeyedScoped<IDataAccessClient, DataAccessClientBus>("bus");
+builder.Services.AddScoped<IDataAccessClient, IDataAccessClient>();
+builder.Services.AddScoped<IDataAccessBusClient, IDataAccessBusClient>();
 builder.Services.AddScoped<IBusSender, BusSender>();
 
 // 
