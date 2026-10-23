@@ -4,9 +4,10 @@ using System.Text.Json;
 using NuGet.SampleSharedModels.DTO;
 using NuGet.SampleSharedModels.Interfaces.ServiceBus;
 using NuGet.SampleSharedModels.Results;
+using SampleAppApi.Interfaces.ExternalServices;
 
 namespace SampleAppApi.Services.External;
-public class DataAccessClientBus : IDataAccessBusClient
+public class DataAccessClientBus : IDataAccessClient
 {
     private const string Base = "v1.0/invoke/sampledataaccessapi/method/api/bus/movies";
 
@@ -99,21 +100,9 @@ public class DataAccessClientBus : IDataAccessBusClient
         catch (Exception ex) { return Fail<MovieDTORead>(nameof(GetById), ex); }
     }
 
-    public async Task<ServiceResult<BusRequest<MovieDTORead>>> Add(BusRequest<MovieDTORead> busRequest)
+    public async Task<ServiceResult<MovieDTORead>> Add(MovieDTOAdd movieDTOAdd)
     {
-        try
-        {
-            using var request = BuildRequest(HttpMethod.Post, $"{Base}", busRequest);
-            var response = await _httpClient.SendAsync(request);
-            response.EnsureSuccessStatusCode();
-
-                
-            var result = await response.Content.ReadFromJsonAsync<ServiceResult<BusRequest<MovieDTORead>>>();
-            return Validate(result);
-        }
-        catch (Exception ex) { 
-            return Fail<BusRequest<MovieDTORead>>(nameof(GetById), ex); 
-        }
+        throw new NotImplementedException("Methos not implemented");
     }
 
     public async Task<ServiceResult<MovieDTORead>> Update(string id, MovieDTOUpdate movieDTOUpdate)

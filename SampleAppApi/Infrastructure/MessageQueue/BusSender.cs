@@ -3,6 +3,7 @@ using System.Text.Json.Serialization;
 using Azure.Identity;
 using Azure.Messaging.ServiceBus;
 using NuGet.SampleSharedModels.DTO.ServiceBus;
+using NuGet.SampleSharedModels.Enums.EnumsServiceBus;
 using NuGet.SampleSharedModels.Interfaces.ServiceBus;
 
 

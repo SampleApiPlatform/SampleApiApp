@@ -25,8 +25,8 @@ public class MoviesController : ControllerBase
     private readonly string controllerName = string.Empty;
     public MoviesController(
         ILogger<MoviesController> logger,
-        //[FromKeyedServices("dapr")] IDataAccessClient dataAccessClient
-        IDataAccessClient dataAccessClient)
+        [FromKeyedServices("dapr")] IDataAccessClient dataAccessClient)
+        //IDataAccessClient dataAccessClient)
     {
         _logger = logger;
         _dataAccessClient = dataAccessClient;
