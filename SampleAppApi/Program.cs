@@ -1,9 +1,12 @@
 //NEW
 using Azure.Identity;
 using Azure.Messaging.ServiceBus;
+using Azure.Monitor.OpenTelemetry.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using NuGet.SampleSharedModels.Interfaces.ServiceBus;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Trace;
 using SampleAppApi.Extensions;
 using SampleAppApi.Interfaces.ExternalServices;
 using SampleAppApi.Services.External;
@@ -16,7 +19,7 @@ builder.Services.AddKeyedScoped<IDataAccessClient, DataAccessClientBus>("bus");
 //builder.Services.AddScoped<IDataAccessBusClient, DataAccessClientBus>();
 builder.Services.AddScoped<IBusSender, BusSender>();
 
-// 
+// Azure Service Bus
 builder.Services.AddSingleton(sp =>
 {
     // reading values from appsettings.json
@@ -70,10 +73,38 @@ builder.Services.AddAuthorization(options =>
                 .Contains(scope, StringComparer.OrdinalIgnoreCase);
         }));
 });
-//
-//builder.Configuration.AddAzureKeyVault(
-//    new Uri(keyVaultUri),
-//    new DefaultAzureCredential());    
+// we read the KeyVaultUrui from the environment variables
+// the value reference to a url to the Key Vault
+var keyVaultUri = builder.Configuration["KeyVaultUri"];
+
+
+if (string.IsNullOrWhiteSpace(keyVaultUri))
+{
+    throw new InvalidOperationException("KeyVaultUri configuration value is missing.");
+}
+// ---------------------------------------------------------
+// Key Vault integrate
+// We access the key vault with the System Identity
+// Then we can query durectly values from the Key Vault as:
+// var clientSecret = builder.Configuration["AzureAdClientSecret2"];
+// ---------------------------------------------------
+builder.Configuration.AddAzureKeyVault(
+    new Uri(keyVaultUri),
+    new DefaultAzureCredential());    
+
+var ai_connectionString = builder.Configuration["applications-insights-connection-string"];
+// Zusätzliche Instrumentierung VOR dem Distro registrieren
+builder.Services.ConfigureOpenTelemetryTracerProvider((sp, b) => b
+    .AddSource("sampleapiplatform")
+    .AddEntityFrameworkCoreInstrumentation());
+
+builder.Services.ConfigureOpenTelemetryMeterProvider((sp, b) => b
+    .AddRuntimeInstrumentation());
+
+// Distro bringt ASP.NET Core, HttpClient, SqlClient, ILogger, Standard-Metriken
+builder.Services.AddOpenTelemetry()
+    .UseAzureMonitor(o => o.ConnectionString = ai_connectionString);
+
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddHttpClient("dapr", client =>

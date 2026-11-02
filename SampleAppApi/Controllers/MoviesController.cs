@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using SampleAppApi.Interfaces.ExternalServices;
 using NuGet.SampleSharedModels.DTO;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using System.Diagnostics;
 
 
 namespace SampleAppApi.Controllers;
@@ -21,6 +22,8 @@ public class MoviesController : ControllerBase
 {
     private readonly ILogger<MoviesController> _logger;
     private readonly IDataAccessClient _dataAccessClient;
+
+    private static readonly ActivitySource MyActivitySource = new("sampleapiplatform");
 
     private readonly string controllerName = string.Empty;
     public MoviesController(
@@ -54,6 +57,7 @@ public class MoviesController : ControllerBase
     [HttpGet("{id}")]
     public async Task<ActionResult<MovieDTORead>> GetById(string id)
     {
+
             var serviceResult = await _dataAccessClient.GetById(id);
 
             if (!serviceResult.Success)
@@ -74,16 +78,24 @@ public class MoviesController : ControllerBase
     [HttpPost]
     public async Task<IActionResult> Add(MovieDTOAdd movieDTOAdd)
     {
-            var serviceResult = await _dataAccessClient.Add(movieDTOAdd);
+        // 1. Erzeuge einen eigenen Span für die fachliche Logik
+        using var activity = MyActivitySource.StartActivity("SampleAppApi.Add");
+        var serviceResult = await _dataAccessClient.Add(movieDTOAdd);
 
-            if (!serviceResult.Success)
-            {
-                var errorText = string.Join(";", serviceResult.Errors);
-                _logger.LogError($"MovieController.Add Failed: {errorText}");
-                return BadRequest(serviceResult.Errors);
-            }
+        if (!serviceResult.Success)
+        {
+            var errorText = string.Join(";", serviceResult.Errors);
+            _logger.LogError($"MovieController.Add Failed: {errorText}");
+            return BadRequest(serviceResult.Errors);
+        }
 
-            return Ok(serviceResult.Data);
+        // 2. Setze die Correlation ID als Tag
+        var movieDTORead = serviceResult.Data;
+        activity?.SetTag("movie_id", movieDTORead?.Id);
+
+        _logger.LogInformation("Movie added with ID: {MovieId}", movieDTORead?.Id); 
+
+        return Ok(serviceResult.Data);
     }
 
     //[Authorize]
@@ -91,16 +103,16 @@ public class MoviesController : ControllerBase
     public async Task<IActionResult> Update(string id, MovieDTOUpdate movieDTOUpdate)
     {
         
-            var serviceResult = await _dataAccessClient.Update(id, movieDTOUpdate);
+        var serviceResult = await _dataAccessClient.Update(id, movieDTOUpdate);
 
-            if (!serviceResult.Success)
-            {
-                var errorText = string.Join(";", serviceResult.Errors);
-                _logger.LogError($"MovieController.Update Failed: {errorText}");    
-                return BadRequest(serviceResult.Errors);
-            }
+        if (!serviceResult.Success)
+        {
+            var errorText = string.Join(";", serviceResult.Errors);
+            _logger.LogError($"MovieController.Update Failed: {errorText}");    
+            return BadRequest(serviceResult.Errors);
+        }
 
-            return Ok(serviceResult.Data);
+        return Ok(serviceResult.Data);
     }
 
     //[Authorize]
